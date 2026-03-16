@@ -1,18 +1,16 @@
 import CryptoJS from 'crypto-js';
 
-/**
- * SovereignShield Cryptographic Engine
- * This module handles client-side proof generation using ZKP principles.
- */
-
 // A secure seed for ZKP generation (In production, this would be a Private Key in a Secure Enclave)
 const WALLET_SECRET = "sovereign-shield-v3-secure-enclave-anchor";
+
+// MOCK GOVERNMENT SIGNATURE PROTOCOL (For prototype validation)
+export const GOV_AUTH_SIGNATURE = 'SIG_SOVEREIGN_GOV_PRIMARY_Z1';
 
 /**
  * Generate a Zero-Knowledge Proof for an attribute.
  * It provesknowledge of the value without revealing it.
  */
-export const generateProof = (attribute, value, salt = Math.random().toString()) => {
+export const generateProof = (attribute, value) => {
     // 1. Create a Commitment (A one-way hash of the value + secret pepper)
     // This allows the server to verify the truth without seeing the value.
     const commitment = CryptoJS.SHA256(`${value}:${WALLET_SECRET}`).toString();

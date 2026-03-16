@@ -10,15 +10,6 @@ const VerifyCertificate = () => {
     const [loading, setLoading] = useState(false);
     const location = useLocation();
 
-    useEffect(() => {
-        const queryParams = new URLSearchParams(location.search);
-        const idFromUrl = queryParams.get('id');
-        if (idFromUrl) {
-            setRecordId(idFromUrl);
-            autoVerify(idFromUrl);
-        }
-    }, [location]);
-
     const autoVerify = async (id) => {
         setLoading(true);
         setError(null);
@@ -31,6 +22,15 @@ const VerifyCertificate = () => {
         }
         setLoading(false);
     };
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const idFromUrl = queryParams.get('id');
+        if (idFromUrl) {
+            setRecordId(idFromUrl);
+            autoVerify(idFromUrl);
+        }
+    }, [location]);
 
     const handleVerify = async (e) => {
         e.preventDefault();

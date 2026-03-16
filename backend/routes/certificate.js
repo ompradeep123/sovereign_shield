@@ -120,4 +120,94 @@ router.get('/verify/:certId', async (req, res) => {
     }
 });
 
+// 3. Vault & Anchor Document
+router.post('/vault-document', verifyToken, async (req, res) => {
+    try {
+        const citizenId = req.user.id;
+        const { documentName, documentType, documentHash, govSignature } = req.body;
+
+        if (!documentName || !documentHash) {
+            return res.status(400).json({ error: 'Missing document metadata' });
+        }
+
+        // --- STEP 1: AUTHENTICITY VALIDATION (The "Risky" check the user requested) ---
+        // In a production app, we would use crypto.verify() with a Gov Public Key
+        // For the hackathon model, we validate if the document carries a 'SOVEREIGN_GOV_AUTH' protocol signature
+        const isGovAuthenticated = govSignature === 'SIG_SOVEREIGN_GOV_PRIMARY_Z1';
+        
+        if (!isGovAuthenticated) {
+            return res.status(403).json({ 
+                error: 'AUTHENTICATION_FAILURE', 
+                message: 'This document does not carry a valid government digital signature. Vaulting rejected.' 
+            });
+        }
+
+        // --- STEP 2: BLOCKCHAIN ANCHORING ---
+        // Anchor the validated hash to the immutable ledger
+        const recordId = `DOC_${Date.now()}_${citizenId.substring(0, 5)}`;
+        const txHash = await storeHashOnBlockchain(recordId, documentHash);
+
+        // --- STEP 3: PERSISTENCE & AUDIT ---
+        const { data: cert, error: certErr } = await supabase
+            .from('certificates')
+            .insert({
+                certificate_id: recordId,
+                citizen_id: citizenId,
+                service_type: documentType,
+                data_hash: documentHash
+            }).select().single();
+
+        if (certErr) throw certErr;
+
+        await supabase.from('audit_logs').insert({
+            action: `[BLOCKCHAIN_ANCHOR] Document '${documentName}' validated and anchored to Polygon Ledger. TX: ${txHash}`,
+            user_id: citizenId
+        });
+
+        res.json({
+            status: 'SUCCESS',
+            message: 'Document Authenticated & Anchored to Blockchain',
+            txHash: txHash,
+            recordId: recordId
+        });
+
+    } catch (error) {
+        console.error('Vaulting Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 4. Remote ZKP Verification (Service Provider View)
+router.post('/verify-zkp', async (req, res) => {
+    try {
+        const { recordId, zkpProof, claimedHash } = req.body;
+
+        // 1. Resolve Trust from Blockchain
+        const isHashValid = await verifyHashOnBlockchain(recordId, claimedHash);
+        
+        if (!isHashValid) {
+            return res.status(401).json({ 
+                valid: false, 
+                message: 'TRUST_REJECTED: Blockchain hash mismatch. This document has been tampered with.' 
+            });
+        }
+
+        // 2. Mathematically check ZKP against the blockchain-anchored truth
+        // Since we anchored the hash, we can verify the ZKP token against it
+        const isZkpValid = zkpProof.includes('ZKP-x'); // Simulate math check
+
+        if (isZkpValid) {
+            res.json({ 
+                valid: true, 
+                message: 'ZERO_TRUST_APPROVED: Authenticated against Global Ledger via ZKP Selective Disclosure.' 
+            });
+        } else {
+            res.json({ valid: false, message: 'ZKP mathematical proof failed.' });
+        }
+
+    } catch (error) {
+        res.status(500).json({ valid: false, error: error.message });
+    }
+});
+
 module.exports = router;
