@@ -144,7 +144,8 @@ router.post('/vault-document', verifyToken, async (req, res) => {
 
         // --- STEP 2: BLOCKCHAIN ANCHORING ---
         // Anchor the validated hash to the immutable ledger
-        const recordId = `DOC_${Date.now()}_${citizenId.substring(0, 5)}`;
+        // We generate a valid UUID to satisfy the database constraint
+        const recordId = crypto.randomUUID(); 
         const txHash = await storeHashOnBlockchain(recordId, documentHash);
 
         // --- STEP 3: PERSISTENCE & AUDIT ---

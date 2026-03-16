@@ -137,6 +137,12 @@ const DigitalIdentityWallet = () => {
         }
     };
 
+    const deleteDoc = (id) => {
+        const updated = documents.filter(d => d.id !== id);
+        setDocuments(updated);
+        if (user?.id) localStorage.setItem(`vault_docs_${user.id}`, JSON.stringify(updated));
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-8 mt-2 pb-16 px-4">
             {/* 1. Header Section */}
