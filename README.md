@@ -47,3 +47,4 @@ The platform follows a decoupled, secure, and scalable multi-cloud design:
 *Built for the National Cybersecurity Hackathon 2026 - SovereignShield Team.*
 # SovereignShield Trigger
 # Monorepo Fix
+# Path Correction

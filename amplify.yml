@@ -4,7 +4,6 @@ applications:
       phases:
         preBuild:
           commands:
-            - cd frontend
             - npm install
             - echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
             - echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
@@ -13,11 +12,12 @@ applications:
           commands:
             - npm run build
       artifacts:
-        baseDirectory: frontend/dist
+        baseDirectory: dist
         files:
           - '**/*'
       cache:
         paths:
-          - frontend/node_modules/**/*
+          - node_modules/**/*
     appRoot: frontend
+
 
