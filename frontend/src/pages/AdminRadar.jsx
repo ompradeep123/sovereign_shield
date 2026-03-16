@@ -1,103 +1,123 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
-import { ShieldAlert, Users, Network, ActivitySquare, AlertTriangle } from 'lucide-react';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
+import { Radio, ShieldAlert, BarChart, Clock, Eye, ChevronLeft, Globe, Activity, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const AdminRadar = () => {
-    const [radarData, setRadarData] = useState(null);
-
-    const fetchRadar = async () => {
-        try {
-            const res = await api.get('/admin/radar');
-            setRadarData(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    const [telemetry, setTelemetry] = useState(null);
+    const [threats, setThreats] = useState([]);
 
     useEffect(() => {
+        const fetchRadar = async () => {
+            try {
+                const [tel, aud] = await Promise.all([
+                    api.get('/admin/threat-telemetry'),
+                    api.get('/admin/security-audit')
+                ]);
+                setTelemetry(tel.data);
+                setThreats(aud.data.filter(l => l.severity === 'CRITICAL' || l.severity === 'HIGH').slice(0, 10));
+            } catch (err) {
+                console.error(err);
+            }
+        };
         fetchRadar();
-        const interval = setInterval(fetchRadar, 5000); // Live poll
+        const interval = setInterval(fetchRadar, 15000);
         return () => clearInterval(interval);
     }, []);
 
-    if (!radarData) return <div className="p-8 text-center text-gray-500 font-mono tracking-widest animate-pulse">SIEM INITIALIZING...</div>;
-
-    const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-            {
-                label: 'Threat Mitigations',
-                data: [12, 19, 3, 5, 2, 3],
-                fill: true,
-                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                borderColor: 'rgb(239, 68, 68)',
-            },
-            {
-                label: 'Secure Connections',
-                data: [45, 60, 55, 80, 75, radarData.totalUsers * 10],
-                fill: true,
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                borderColor: 'rgb(16, 185, 129)',
-            }
-        ],
-    };
+    if (!telemetry) return <div className="p-20 text-center animate-pulse">Scanning Global Threat Vectors...</div>;
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6 mt-4">
-            <div className="bg-[#0f172a]/80 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl p-6 lg:p-8 text-white overflow-hidden relative group">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-red-500 opacity-10 group-hover:opacity-20 transition-opacity duration-700 blur-[120px] rounded-full pointer-events-none"></div>
-                
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-white/5 pb-6 gap-4 relative z-10">
+        <div className="max-w-7xl mx-auto space-y-8 pb-20">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Link to="/admin" className="p-2 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors">
+                        <ChevronLeft className="text-white" size={20} />
+                    </Link>
                     <div>
-                        <h2 className="text-3xl md:text-4xl font-extrabold flex items-center tracking-tight text-white mb-2"><ActivitySquare className="text-red-500 mr-4 shrink-0 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" size={36}/> National Threat Radar</h2>
-                        <p className="text-slate-400 uppercase text-xs tracking-widest font-mono font-bold">Quantum-Resistant Telemetry</p>
+                        <h1 className="text-2xl font-black text-white uppercase tracking-tight">Cyber Threat Radar</h1>
+                        <p className="text-slate-500 text-xs font-mono uppercase tracking-widest">Real-time Anomaly Detection & Attack Intelligence</p>
                     </div>
-                    <div className="bg-[#1e293b]/50 p-4 rounded-xl border border-white/5 text-center shadow-inner w-full md:w-auto backdrop-blur-sm">
-                        <div className="text-xs text-slate-400 font-mono mb-2 uppercase tracking-widest font-bold">Defcon Level</div>
-                        <div className={`text-3xl font-black ${radarData.systemThreatLevel === 'HIGH' ? 'text-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]'}`}>
-                            {radarData.systemThreatLevel}
-                        </div>
+                </div>
+                <div className={`px-6 py-2.5 rounded-full flex items-center gap-3 border transition-all ${telemetry.threatLevel === 'STABLE' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/20 border-red-500/40 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]'}`}>
+                    <Radio className={telemetry.threatLevel !== 'STABLE' ? 'animate-ping' : ''} size={18} />
+                    <span className="text-xs font-black uppercase tracking-[0.2em]">GLOBAL LEVEL: {telemetry.threatLevel}</span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Visual Radar Container */}
+                <div className="lg:col-span-2 bg-[#0f172a] border border-white/5 rounded-3xl p-1 relative overflow-hidden aspect-video flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0,transparent_100%)]"></div>
+                    {/* Radar Circles */}
+                    <div className="absolute w-[80%] aspect-square border-2 border-slate-800 rounded-full"></div>
+                    <div className="absolute w-[60%] aspect-square border border-slate-800 rounded-full"></div>
+                    <div className="absolute w-[40%] aspect-square border border-slate-800 rounded-full"></div>
+                    <div className="absolute w-[20%] aspect-square border border-slate-800 rounded-full"></div>
+                    
+                    {/* Center Point */}
+                    <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)] z-10"></div>
+                    
+                    {/* Radar Sweep */}
+                    <div className="absolute w-1/2 h-1 bg-gradient-to-r from-blue-500/0 to-blue-500/80 origin-left animate-radar-sweep top-1/2 left-1/2 -mt-0.5"></div>
+
+                    {/* Threat Blips (Simulated) */}
+                    <div className="absolute top-[20%] left-[30%] w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    <div className="absolute bottom-[25%] right-[20%] w-2 h-2 bg-orange-500 rounded-full animate-ping [animation-delay:1s]"></div>
+                    <div className="absolute top-[40%] right-[35%] w-2 h-2 bg-yellow-500 rounded-full animate-ping [animation-delay:0.5s]"></div>
+
+                    <div className="absolute bottom-8 left-8 p-4 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 z-20">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Active Vectors</p>
+                        <ul className="space-y-1">
+                            <li className="text-[11px] font-bold text-red-400 flex items-center gap-2"><MapPin size={10} /> Origin: MASKED_CDN_IP</li>
+                            <li className="text-[11px] font-bold text-orange-400 flex items-center gap-2"><MapPin size={10} /> Type: Biometric_Brute_Force</li>
+                        </ul>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 relative z-10">
-                    <div className="bg-[#1e293b]/50 p-6 rounded-xl border border-white/5 flex items-center justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all">
-                        <div><p className="text-slate-400 text-xs font-mono uppercase font-bold tracking-widest">Active Nodes</p><h3 className="text-3xl font-black mt-2 text-white">{radarData.totalUsers}</h3></div>
-                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20"><Network className="text-blue-400 h-8 w-8"/></div>
-                    </div>
-                    <div className="bg-[#1e293b]/50 p-6 rounded-xl border border-white/5 flex items-center justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all">
-                        <div><p className="text-slate-400 text-xs font-mono uppercase font-bold tracking-widest">DDoS Mitigated</p><h3 className="text-3xl font-black mt-2 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">1.2M</h3></div>
-                        <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20"><ShieldAlert className="text-emerald-400 h-8 w-8"/></div>
-                    </div>
-                    <div className="bg-[#1e293b]/50 p-6 rounded-xl border border-white/5 flex items-center justify-between col-span-1 md:col-span-2 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all">
-                        <div><p className="text-slate-400 text-xs font-mono uppercase font-bold tracking-widest">Failed Authentication Attempts</p><h3 className="text-3xl font-black mt-2 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{radarData.failedLogins}</h3></div>
-                        <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20"><AlertTriangle className="text-red-500 h-8 w-8 animate-pulse"/></div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-                    <div className="col-span-1 lg:col-span-2 bg-[#1e293b]/30 p-6 rounded-xl border border-white/5 shadow-inner">
-                        <h3 className="text-xs font-mono text-slate-400 uppercase font-bold tracking-widest mb-6 border-b border-white/5 pb-3">Network Traffic Metrics</h3>
-                        <div className="h-64">
-                             <Line data={chartData} options={{ maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } }} />
+                {/* Threat Stats */}
+                <div className="space-y-6">
+                    <div className="bg-[#0f172a] border border-white/5 rounded-3xl p-8">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Threat Intelligence</h3>
+                        <div className="space-y-6">
+                            {[
+                                { label: 'Brute Force Blocks', val: telemetry.bruteForceAttempts, icon: <ShieldAlert className="text-red-500" />, sub: 'Last 24h' },
+                                { label: 'Bot Identification', val: telemetry.botTrafficRate, icon: <Activity className="text-blue-400" />, sub: 'Traffic margin' },
+                                { label: 'DDoS Mitigation', val: telemetry.ddosStatus, icon: <Globe className="text-emerald-400" />, sub: 'Active Shielding' }
+                            ].map((s, i) => (
+                                <div key={i} className="flex gap-4 items-center">
+                                    <div className="p-3 bg-slate-800 rounded-xl">{s.icon}</div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">{s.label}</p>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-xl font-black text-white">{s.val}</span>
+                                            <span className="text-[9px] font-bold text-slate-600 uppercase">{s.sub}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="bg-[#1e293b]/30 p-6 rounded-xl border border-white/5 overflow-y-auto max-h-[340px] custom-scrollbar shadow-inner text-sm">
-                        <h3 className="text-xs font-mono text-slate-400 uppercase font-bold tracking-widest mb-6 border-b border-white/5 pb-3 flex items-center"><ShieldAlert size={16} className="mr-2 text-red-500"/> Live Penetration Logs</h3>
-                        <div className="space-y-3 font-mono">
-                             {radarData.recentThreats.length === 0 ? <p className="text-emerald-500 font-bold p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20 text-xs">No threats detected.</p> : null}
-                             {radarData.recentThreats.map((t, idx) => (
-                                 <div key={idx} className={`p-3 rounded-lg border-l-4 ${t.severity === 'HIGH' ? 'bg-[#0f172a] border-red-500 text-red-400' : 'bg-[#0f172a] border-yellow-500 text-yellow-400'} text-xs border border-white/5 shadow-sm`}>
-                                     <div className="flex justify-between font-bold mb-2 tracking-wide">
-                                        <span>[{t.severity}] {t.ip || 'UNKNOWN'}</span>
-                                        <span className="text-slate-500">{new Date(t.timestamp).toLocaleTimeString()}</span>
-                                     </div>
-                                     <div className="text-slate-400 break-all bg-black/20 p-2 rounded">{t.message} ➔ {t.path}</div>
-                                 </div>
-                             ))}
+                    <div className="bg-[#0f172a] border border-white/5 rounded-3xl p-8 flex-1">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex justify-between items-center">
+                            Recent Intercepts
+                            <span className="px-2 py-0.5 bg-red-500 text-white rounded text-[8px] tracking-tighter uppercase">AUTO-BLOCKED</span>
+                        </h3>
+                        <div className="space-y-3">
+                            {threats.map((t, i) => (
+                                <div key={i} className="flex gap-3 text-[10px] font-bold uppercase tracking-tight p-3 bg-black/20 rounded-xl border border-white/5">
+                                    <ShieldAlert className="text-red-500 shrink-0" size={14} />
+                                    <div className="overflow-hidden">
+                                        <p className="text-white truncate">{t.event}</p>
+                                        <p className="text-slate-600 font-mono text-[9px]">{new Date(t.time).toLocaleTimeString()}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            {threats.length === 0 && (
+                                <p className="text-center py-8 text-[10px] text-slate-600 font-black uppercase tracking-widest italic">Monitoring Clear Skies...</p>
+                            )}
                         </div>
                     </div>
                 </div>

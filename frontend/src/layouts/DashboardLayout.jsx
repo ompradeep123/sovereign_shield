@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, User, LogOut, Home, Key, FileText, Activity, Layers, ActivitySquare, ServerCrash, AlertCircle, Users, Link as LinkIcon, Shield, Settings, Menu, X } from 'lucide-react';
+import { ShieldCheck, User, LogOut, Home, Key, FileText, Activity, Layers, ActivitySquare, ServerCrash, AlertCircle, Users, Link as LinkIcon, Shield, Settings, Menu, X, Radio, RefreshCw, Lock } from 'lucide-react';
 import { AuthContext, api } from '../context/AuthContext';
 
 const DashboardLayout = () => {
@@ -29,15 +29,11 @@ const DashboardLayout = () => {
     { name: 'My Services', path: '/services', icon: <Layers size={20} />, role: 'all' },
     { name: 'Trust Timeline', path: '/timeline', icon: <Activity className="text-blue-500" size={20} />, role: 'all' },
     { name: 'Verify Certificate', path: '/verify-cert', icon: <ShieldCheck size={20} />, role: 'all' },
-    { name: 'System Dashboard', path: '/admin-dashboard', icon: <Home size={20} />, role: 'admin' },
-    { name: 'National Threat Radar', path: '/admin-radar', icon: <ActivitySquare size={20} />, role: 'admin' },
-    { name: 'Exception Queue', path: '/admin-exceptions', icon: <AlertCircle size={20} />, role: 'admin' },
-    { name: 'Citizen Records', path: '/admin-citizens', icon: <Users size={20} />, role: 'admin' },
-    { name: 'Blockchain Integrity', path: '/admin-chain', icon: <LinkIcon size={20} />, role: 'admin' },
-    { name: 'System Health', path: '/system-status', icon: <Activity size={20} />, role: 'admin' },
-    { name: 'Disaster Recovery', path: '/disaster-recovery', icon: <ServerCrash size={20} />, role: 'admin' },
-    { name: 'Audit Logs', path: '/admin-audit', icon: <FileText size={20} />, role: 'admin' },
-    { name: 'Admin Management', path: '/admin-management', icon: <Settings size={20} />, role: 'admin' },
+    { name: 'SOC Central Command', path: '/admin', icon: <Home size={20} />, role: 'admin' },
+    { name: 'Live Monitoring', path: '/admin/monitoring', icon: <Activity size={20} />, role: 'admin' },
+    { name: 'Cyber Threat Radar', path: '/admin/radar', icon: <Radio size={20} />, role: 'admin' },
+    { name: 'Security Audit', path: '/admin/security-audit', icon: <Lock size={20} />, role: 'admin' },
+    { name: 'Disaster Recovery', path: '/admin/disaster-recovery', icon: <RefreshCw size={20} />, role: 'admin' },
   ];
 
   const filteredLinks = navLinks.filter(item => item.role === 'all' || item.role === user?.role);

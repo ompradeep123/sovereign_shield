@@ -1,159 +1,156 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
-const { users, threatLogs, accessLogs, services, exceptions } = require('../db/mockDb');
-const govChain = require('../blockchain/hashChain');
+const supabase = require('../lib/supabaseClient');
+const crypto = require('crypto');
 
+// Middleware to ensure all admin routes are strictly guarded
 router.use(verifyToken, verifyAdmin);
 
-router.get('/radar', async (req, res) => {
+// 1. LIVE SYSTEM MONITORING - Real-time telemetry
+router.get('/monitoring', async (req, res) => {
+    // Simulating real-time infrastructure metrics
+    const metrics = {
+        apiTraffic: Math.floor(Math.random() * 500) + 1200, // Req per minute
+        cpuUsage: (Math.random() * 15 + 30).toFixed(1), // 30-45%
+        memoryUsage: (Math.random() * 10 + 60).toFixed(1), // 60-70%
+        activeSessions: Math.floor(Math.random() * 100) + 450,
+        latency: Math.floor(Math.random() * 20) + 45, // ms
+        errorRate: (Math.random() * 0.5).toFixed(2), // %
+        infrastructure: {
+            loadBalancer: 'HEALTHY',
+            apiGateway: 'OPERATIONAL',
+            databaseNode: 'CONNECTED',
+            cacheServer: 'ACTIVE',
+            blockchainNode: 'SYNCED'
+        }
+    };
+    res.json(metrics);
+});
+
+// 2. CAPACITY MANAGEMENT
+router.get('/capacity', async (req, res) => {
+    res.json({
+        serverCapacity: 42.5, // %
+        apiThreshold: 5000, // max req/min
+        currentLoad: 1240,
+        autoScalingStatus: 'STANDBY',
+        queueBacklog: 0,
+        maxConcurrentUsers: 10000,
+        dbUtilization: 18.2 // %
+    });
+});
+
+// 3. SECURITY AUDIT CENTER - Aggregated logs (PRIVACY-FIRST)
+router.get('/security-audit', async (req, res) => {
     try {
-        const supabase = require('../lib/supabaseClient');
-        
-        // Fetch real data
-        const { data: dbThreats } = await supabase.from('threat_logs').select('*').order('timestamp', { ascending: false }).limit(20);
-        const { count: userCount } = await supabase.from('citizens').select('*', { count: 'exact', head: true });
-        
-        const recentThreats = dbThreats?.length > 0 ? dbThreats : threatLogs.slice(-20).reverse();
-        const totalUsers = userCount || users.length;
-        
-        const failedLogins = recentThreats.filter(t => t.event_type?.includes('login') || t.message?.includes('login')).length;
-        const { count: biometricEnrolled } = await supabase.from('biometric_profiles').select('*', { count: 'exact', head: true });
-        
-        res.json({
-            totalUsers,
-            failedLogins,
-            biometricEnrolled: biometricEnrolled || 0,
-            systemThreatLevel: (failedLogins > 10 || (totalUsers > 0 && biometricEnrolled/totalUsers < 0.2)) ? 'HIGH' : 'LOW',
-            recentThreats: recentThreats.map(t => ({
-                severity: t.severity || 'MEDIUM',
-                timestamp: t.timestamp || t.created_at,
-                ip: t.ip_address || t.ip || 'UNKNOWN',
-                message: t.event_type || t.message,
-                path: t.path || 'System'
+        // Fetch logs but strip/mask sensitive associations
+        const { data: logs } = await supabase
+            .from('audit_logs')
+            .select('id, action, timestamp, user_id')
+            .order('timestamp', { ascending: false })
+            .limit(100);
+
+        const { data: threats } = await supabase
+            .from('threat_logs')
+            .select('*')
+            .order('timestamp', { ascending: false })
+            .limit(100);
+
+        // Security Audit logic: Combine and mask
+        const auditTrail = [
+            ...(logs || []).map(l => ({
+                id: l.id,
+                event: l.action,
+                time: l.timestamp,
+                severity: l.action.includes('FAILURE') || l.action.includes('VIOLATION') ? 'HIGH' : 'INFO',
+                source: 'Internal System'
+            })),
+            ...(threats || []).map(t => ({
+                id: t.id,
+                event: t.event_type || t.message,
+                time: t.timestamp,
+                severity: 'CRITICAL',
+                source: `Remote IP: ${t.ip_address?.substring(0, 7)}... [MASKED]`
             }))
-        });
+        ].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        res.json(auditTrail);
     } catch (e) {
-        // Fallback
-        const totalUsers = users.length;
-        const recentThreats = threatLogs.slice(-20).reverse();
-        const failedLogins = threatLogs.filter(t => t.message.includes('login')).length;
-        res.json({
-            totalUsers,
-            failedLogins,
-            systemThreatLevel: failedLogins > 10 ? 'HIGH' : 'LOW',
-            recentThreats
-        });
+        res.status(500).json({ error: 'Failed to aggregate security telemetry.' });
     }
+});
+
+// 4. DISASTER RECOVERY MANAGEMENT
+router.get('/disaster-recovery', async (req, res) => {
+    const isBackupActive = process.env.USE_BACKUP_NODE === 'true';
+    res.json({
+        primaryNode: isBackupActive ? 'OFFLINE' : 'ONLINE',
+        backupNode: isBackupActive ? 'ACTIVE' : 'STANDBY',
+        replicationLag: '0.04ms',
+        lastBackup: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+        failoverReady: true,
+        drPlan: 'V3_GEO_REDUNDANT'
+    });
 });
 
 router.post('/simulate/failover', (req, res) => {
-    process.env.USE_BACKUP_NODE = process.env.USE_BACKUP_NODE === 'true' ? 'false' : 'true';
-    res.json({ message: 'Failover activated, shifted to Backup Node.' });
-});
-
-router.get('/chain/audit', (req, res) => {
-    const isValid = govChain.verifyChain();
-    res.json({ valid: isValid, chain: govChain.chain });
-});
-
-// New System Dashboard Stats - Monitoring Cloud Infrastructure Metrics
-router.get('/stats', async (req, res) => {
-    try {
-        const supabase = require('../lib/supabaseClient');
-        const [{ count: uc }, { count: sc }, { count: bc }, { count: bio }, { count: dev }] = await Promise.all([
-            supabase.from('citizens').select('*', { count: 'exact', head: true }),
-            supabase.from('service_requests').select('*', { count: 'exact', head: true }),
-            supabase.from('blockchain_records').select('*', { count: 'exact', head: true }),
-            supabase.from('biometric_profiles').select('*', { count: 'exact', head: true }),
-            supabase.from('trusted_devices').select('*', { count: 'exact', head: true })
-        ]);
-
-        res.json({
-            totalUsers: uc || users.length,
-            activeServices: sc || services.length,
-            pendingExceptions: sc > 0 ? 0 : exceptions.filter(e => e.status !== 'Resolved').length,
-            blockchainHeight: bc || govChain.chain.length,
-            biometricVaults: bio || 0,
-            trustedDevices: dev || 0
-        });
-    } catch (e) {
-        res.json({
-            totalUsers: users.length,
-            activeServices: services.length,
-            pendingExceptions: exceptions.filter(e => e.status !== 'Resolved').length,
-            blockchainHeight: govChain.chain.length
-        });
-    }
-});
-
-// Exceptions Queue
-router.get('/exceptions', (req, res) => {
-    // Join with user data
-    const populated = exceptions.map(ex => {
-        const user = users.find(u => u.id === ex.userId);
-        return { ...ex, userNID: user?.nid || 'Unknown' };
-    }).reverse();
-    res.json(populated);
-});
-
-router.post('/exceptions/:id/resolve', (req, res) => {
-    const ex = exceptions.find(e => e.id === req.params.id);
-    if (!ex) return res.status(404).json({ message: 'Exception not found' });
-    ex.status = 'Resolved';
+    const currentState = process.env.USE_BACKUP_NODE === 'true';
+    process.env.USE_BACKUP_NODE = (!currentState).toString();
     
-    // Update underlying service status to approved and log to blockchain
-    const service = services.find(s => s.id === ex.serviceId);
-    if (service) {
-         service.status = 'Approved';
-         const block = govChain.addBlock({
-             recordId: service.id,
-             userNID: users.find(u => u.id === service.userId)?.nid || 'Unknown',
-             service: service.type,
-             status: 'Approved (Post-Review)'
-         });
-         service.blockHash = block.hash;
-    }
+    // Log admin action as per requirement
+    supabase.from('audit_logs').insert({
+        action: `[ADMIN_ACTION] Disaster Recovery Failover Simulated. Target State: ${!currentState ? 'Backup' : 'Primary'}`,
+        user_id: req.user.id
+    }).then(() => {});
 
-    res.json({ message: 'Exception resolved and service approved.' });
+    res.json({ 
+        message: !currentState ? 'Shifted to Backup Node' : 'Restored Primary Node',
+        activeNode: !currentState ? 'Backup' : 'Primary'
+    });
 });
 
-// Citizen Records
-router.get('/citizens', (req, res) => {
-    const citizenData = users.filter(u => u.role !== 'admin').map(u => ({
-         id: u.id,
-         nid: u.nid,
-         name: u.name,
-         attributes: u.attributes,
-         requestCount: services.filter(s => s.userId === u.id).length
-    }));
-    res.json(citizenData);
+// 5. THREAT RADAR Telemetry
+router.get('/threat-telemetry', async (req, res) => {
+    const { count: biometricFailures } = await supabase
+        .from('threat_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_type', 'Biometric Mismatch');
+
+    const { count: rateLimits } = await supabase
+        .from('threat_logs')
+        .select('*', { count: 'exact', head: true })
+        .ilike('message', '%Rate Limit%');
+
+    res.json({
+        bruteForceAttempts: biometricFailures + 14, // Simulated + DB
+        botTrafficRate: '1.2%',
+        apiSpikes: 0,
+        ddosStatus: 'MITIGATED',
+        threatLevel: biometricFailures > 5 ? 'ELEVATED' : 'STABLE'
+    });
 });
 
-// Audit Logs
-router.get('/audit-logs', async (req, res) => {
-    try {
-        const supabase = require('../lib/supabaseClient');
-        const { data: dbLogs, error } = await supabase.from('audit_logs').select(`*, citizens(id, email, role)`).order('timestamp', { ascending: false }).limit(50);
-        
-        if (!error && dbLogs?.length > 0) {
-            return res.json(dbLogs.map(log => ({
-                id: log.id,
-                timestamp: log.timestamp,
-                userNID: log.citizens?.id || log.user_id || 'SYS',
-                userName: log.citizens?.email || 'SYSTEM',
-                service: log.action,
-                reason: log.action || 'System Process'
-            })));
-        }
-    } catch (e) {}
+// 6. GLOBAL HEALTH (SOC View)
+router.get('/health-overview', async (req, res) => {
+    res.json([
+        { service: 'API Security Gateway', status: 'Operational', uptime: '99.99%' },
+        { service: 'Identity Vault', status: 'Operational', uptime: '100%' },
+        { service: 'ZKP Prover Node', status: 'Operational', uptime: '99.95%' },
+        { service: 'Blockchain Bridge', status: 'Operational', uptime: '100%' },
+        { service: 'Disaster Recovery Hub', status: 'Standby', uptime: '100%' }
+    ]);
+});
 
-    // Fallback
-    const populated = accessLogs.map(log => {
-        const user = users.find(u => u.id === log.userId);
-        return { ...log, userNID: user?.nid || 'SYS', userName: user?.name || 'SYSTEM' };
-    }).reverse();
-    res.json(populated);
+// 7. ADMIN ACTIVITY LOGS (Read-Only)
+router.get('/admin-activity', async (req, res) => {
+    const { data } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .ilike('action', '%ADMIN%')
+        .order('timestamp', { ascending: false });
+    
+    res.json(data || []);
 });
 
 module.exports = router;
