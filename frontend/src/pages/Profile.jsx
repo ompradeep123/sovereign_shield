@@ -7,6 +7,7 @@ const Profile = () => {
     const { user } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [registering, setRegistering] = useState(false);
     const [cameraActive, setCameraActive] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
@@ -14,11 +15,14 @@ const Profile = () => {
 
     const fetchProfile = async () => {
         try {
+            setError(null);
             const res = await api.get('/services/profile');
             setProfile(res.data);
-            setLoading(false);
         } catch (err) {
             console.error(err);
+            setError(err.response?.data?.error || 'Failed to establish secure connection to Vault.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -57,6 +61,22 @@ const Profile = () => {
     };
 
     if (loading) return <div className="p-20 text-center text-slate-500 animate-pulse font-mono uppercase tracking-widest">Accessing Secure Vault...</div>;
+
+    if (error) return (
+        <div className="p-20 text-center space-y-6">
+            <div className="inline-flex p-6 bg-red-500/10 border border-red-500/20 rounded-full">
+                <ShieldAlert className="text-red-500" size={48} />
+            </div>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Security Handshake Failure</h2>
+            <p className="text-slate-400 max-w-md mx-auto font-mono text-sm uppercase tracking-widest">{error}</p>
+            <button 
+                onClick={fetchProfile}
+                className="px-8 py-3 bg-[#1e293b] text-white rounded-xl font-bold uppercase tracking-widest text-xs border border-white/10 hover:bg-white/5 transition-colors"
+            >
+                Retry Identity Sync
+            </button>
+        </div>
+    );
 
     return (
         <div className="max-w-5xl mx-auto space-y-8 mt-4 pb-20">
