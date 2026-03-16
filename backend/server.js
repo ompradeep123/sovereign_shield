@@ -27,10 +27,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 2. Traffic Control - Rate Limiting
+// 2. Traffic Control - Rate Limiting & Proxy Trust
+app.set('trust proxy', 1); // Crucial for AWS/Ngrok: Tells express to use the real client IP instead of the proxy IP
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 100,
+  max: 2000, // Increased buffer: Hackathon prototypes often hit rate-limits due to hot-reloading and proxy pooling
   message: { error: "Security Gateway: Too many requests. Potential DoS attack blocked." }
 });
 app.use(limiter);
