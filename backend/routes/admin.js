@@ -6,16 +6,43 @@ const govChain = require('../blockchain/hashChain');
 
 router.use(verifyToken, verifyAdmin);
 
-router.get('/radar', (req, res) => {
-    const totalUsers = users.length;
-    const recentThreats = threatLogs.slice(-20).reverse();
-    const failedLogins = threatLogs.filter(t => t.message.includes('login')).length;
-    res.json({
-        totalUsers,
-        failedLogins,
-        systemThreatLevel: failedLogins > 10 ? 'HIGH' : 'LOW',
-        recentThreats
-    });
+router.get('/radar', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        
+        // Fetch real data
+        const { data: dbThreats } = await supabase.from('threat_logs').select('*').order('timestamp', { ascending: false }).limit(20);
+        const { count: userCount } = await supabase.from('citizens').select('*', { count: 'exact', head: true });
+        
+        const recentThreats = dbThreats?.length > 0 ? dbThreats : threatLogs.slice(-20).reverse();
+        const totalUsers = userCount || users.length;
+        
+        const failedLogins = recentThreats.filter(t => t.event_type?.includes('login') || t.message?.includes('login')).length;
+        
+        res.json({
+            totalUsers,
+            failedLogins,
+            systemThreatLevel: failedLogins > 10 ? 'HIGH' : 'LOW',
+            recentThreats: recentThreats.map(t => ({
+                severity: t.severity || 'MEDIUM',
+                timestamp: t.timestamp || t.created_at,
+                ip: t.ip_address || t.ip || 'UNKNOWN',
+                message: t.event_type || t.message,
+                path: t.path || 'System'
+            }))
+        });
+    } catch (e) {
+        // Fallback
+        const totalUsers = users.length;
+        const recentThreats = threatLogs.slice(-20).reverse();
+        const failedLogins = threatLogs.filter(t => t.message.includes('login')).length;
+        res.json({
+            totalUsers,
+            failedLogins,
+            systemThreatLevel: failedLogins > 10 ? 'HIGH' : 'LOW',
+            recentThreats
+        });
+    }
 });
 
 router.post('/simulate/failover', (req, res) => {
@@ -82,7 +109,24 @@ router.get('/citizens', (req, res) => {
 });
 
 // Audit Logs
-router.get('/audit-logs', (req, res) => {
+router.get('/audit-logs', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        const { data: dbLogs, error } = await supabase.from('audit_logs').select(`*, citizens(id, email, role)`).order('timestamp', { ascending: false }).limit(50);
+        
+        if (!error && dbLogs?.length > 0) {
+            return res.json(dbLogs.map(log => ({
+                id: log.id,
+                timestamp: log.timestamp,
+                userNID: log.citizens?.id || log.user_id || 'SYS',
+                userName: log.citizens?.email || 'SYSTEM',
+                service: log.action,
+                reason: log.action || 'System Process'
+            })));
+        }
+    } catch (e) {}
+
+    // Fallback
     const populated = accessLogs.map(log => {
         const user = users.find(u => u.id === log.userId);
         return { ...log, userNID: user?.nid || 'SYS', userName: user?.name || 'SYSTEM' };

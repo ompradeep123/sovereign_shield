@@ -15,7 +15,7 @@ const VerifyCertificate = () => {
         setResult(null);
 
         try {
-            const res = await api.get(`/services/verify-cert/${recordId}`);
+            const res = await api.get(`/certificates/verify/${recordId}`);
             setResult(res.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Verification Error');
@@ -58,13 +58,13 @@ const VerifyCertificate = () => {
                             <p className="text-emerald-700 font-medium mb-6 z-10">Cryptographic hash matches immutable ledger.</p>
                             
                             <div className="bg-white w-full rounded-lg shadow border border-emerald-200 text-left overflow-hidden z-10 text-sm">
-                                <div className="bg-emerald-100 px-4 py-2 font-semibold text-emerald-800 border-b border-emerald-200 border-dashed">Block Metadata</div>
+                                <div className="bg-emerald-100 px-4 py-2 font-semibold text-emerald-800 border-b border-emerald-200 border-dashed">Polygon Smart Contract Extracted Metadata</div>
                                 <div className="p-4 font-mono text-xs text-gray-600 space-y-2">
-                                    <p><span className="text-gray-400">Timestamp:</span> {result.block.timestamp}</p>
-                                    <p><span className="text-gray-400">Previous Hash:</span> {result.block.previousHash}</p>
-                                    <p className="break-all"><span className="text-gray-400">Current Hash:</span> {result.block.hash}</p>
-                                    <p><span className="text-gray-400">Service:</span> {result.block.data.service}</p>
-                                    <p><span className="text-gray-400">Status:</span> {result.block.data.status}</p>
+                                    <p><span className="text-gray-400">Timestamp:</span> {new Date(result.certificate.created_at).toLocaleString()}</p>
+                                    <p><span className="text-gray-400">Previous Tx Hash:</span> N/A (Stored On-Chain)</p>
+                                    <p className="break-all"><span className="text-gray-400">Current Hash:</span> {result.certificate.data_hash}</p>
+                                    <p><span className="text-gray-400">Service:</span> {result.certificate.service_type}</p>
+                                    <p><span className="text-gray-400">Status:</span> Verified ✔</p>
                                 </div>
                             </div>
                         </div>

@@ -11,7 +11,7 @@ const DigitalIdentityWallet = () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await api.get('/services/wallet/zkp');
+            const res = await api.get('/eligibility/verify');
             setProofs(res.data.proofs);
         } catch (err) {
             setError('Failed to generate cryptographic proofs');

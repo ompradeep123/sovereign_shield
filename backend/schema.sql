@@ -20,7 +20,16 @@ CREATE TABLE public.service_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Blockchain Records
+-- 3. Certificates
+CREATE TABLE public.certificates (
+    certificate_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    citizen_id UUID REFERENCES public.citizens(id) ON DELETE CASCADE,
+    service_type TEXT NOT NULL,
+    data_hash TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4. Blockchain Records
 CREATE TABLE public.blockchain_records (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     record_id UUID UNIQUE NOT NULL REFERENCES public.service_requests(id) ON DELETE CASCADE,
@@ -49,6 +58,7 @@ CREATE TABLE public.audit_logs (
 
 ALTER TABLE public.citizens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blockchain_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.threat_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
@@ -62,6 +72,10 @@ CREATE POLICY "Citizens can insert requests" ON public.service_requests FOR INSE
     WITH CHECK (auth.uid() = citizen_id);
     
 CREATE POLICY "Citizens can view their own requests" ON public.service_requests FOR SELECT
+    USING (auth.uid() = citizen_id);
+
+-- Certificates Policy
+CREATE POLICY "Citizens can view their own certificates" ON public.certificates FOR SELECT
     USING (auth.uid() = citizen_id);
 
 -- Blockchain Records

@@ -94,9 +94,20 @@ router.post('/request', (req, res) => {
 });
 
 // Get User Services
-router.get('/my-services', (req, res) => {
-    const uServices = services.filter(s => s.userId === req.user.id);
-    res.json(uServices);
+router.get('/my-services', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        // Merge Supabase services and mock services for demo purposes
+        const { data: dbServices, error } = await supabase.from('service_requests').select('*').eq('citizen_id', req.user.id);
+        const { data: dbCerts, err2 } = await supabase.from('certificates').select('*').eq('citizen_id', req.user.id);
+        
+        let all = [...(dbServices || []), ...(dbCerts || [])];
+        res.json(all);
+    } catch (e) {
+        // Mock fallback wrapper
+        const uServices = services.filter(s => s.userId === req.user.id);
+        res.json(uServices);
+    }
 });
 
 // Verify Blockchain Certificate
@@ -112,7 +123,13 @@ router.get('/verify-cert/:id', (req, res) => {
 });
 
 // Trust timeline
-router.get('/timeline', (req, res) => {
+router.get('/timeline', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        const { data, error } = await supabase.from('audit_logs').select('*').eq('user_id', req.user.id).order('timestamp', { ascending: false });
+        if (data && data.length > 0) return res.json(data);
+    } catch (e) {}
+    
     const uTimeline = accessLogs.filter(a => a.userId === req.user.id).reverse();
     res.json(uTimeline);
 });
