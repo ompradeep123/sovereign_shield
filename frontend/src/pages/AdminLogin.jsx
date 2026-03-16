@@ -20,9 +20,12 @@ const AdminLogin = () => {
     try {
       const { data, error: loginError } = await login(email, password);
       
+      const user = data?.user;
+      const role = user?.user_metadata?.role || user?.app_metadata?.role || user?.role;
+
       if (loginError) {
         setError(loginError.message);
-      } else if (data?.user?.user_metadata?.role !== 'admin') {
+      } else if (role !== 'admin') {
         setError('SEC_VIOLATION: Non-administrative account detected. Access Denied.');
       } else {
         navigate('/admin');
