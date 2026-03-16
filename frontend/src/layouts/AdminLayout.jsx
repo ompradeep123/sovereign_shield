@@ -28,28 +28,40 @@ const AdminLayout = () => {
   // If user is not admin, they shouldn't even see this (App.jsx will handle protection)
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-300 flex">
+    <div className="min-h-screen bg-[#030712] text-slate-300 flex overflow-x-hidden">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Admin Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} glass-dark border-r border-white/5 flex flex-col`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-300 transform 
+        ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-20'} 
+        bg-[#0a0f1e] border-r border-white/5 flex flex-col shadow-2xl`}>
+        
         <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+          <div className="min-w-[2.5rem] w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
             <Shield className="text-white" size={24} />
           </div>
-          {isSidebarOpen && (
-            <div className="flex flex-col">
+          {(isSidebarOpen) && (
+            <div className={`flex flex-col transition-opacity duration-300 ${!isSidebarOpen && 'lg:opacity-0'}`}>
               <span className="text-white font-black tracking-tighter text-lg leading-none">SOVEREIGN</span>
               <span className="text-blue-500 font-mono text-[10px] font-bold tracking-[0.2em]">SOC_ADMIN_V3</span>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 mt-6 px-4 space-y-2">
+        <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
             return (
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
                 className={`flex items-center gap-4 p-3.5 rounded-xl transition-all group ${
                   isActive 
                   ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' 
@@ -57,55 +69,57 @@ const AdminLayout = () => {
                 }`}
               >
                 <span className={`${isActive ? 'text-blue-400' : 'group-hover:text-slate-300'}`}>{link.icon}</span>
-                {isSidebarOpen && <span className="text-sm font-bold uppercase tracking-wider">{link.name}</span>}
+                <span className={`text-sm font-bold uppercase tracking-wider whitespace-nowrap lg:transition-opacity lg:duration-300 ${!isSidebarOpen && 'lg:hidden'}`}>{link.name}</span>
                 {isActive && isSidebarOpen && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,1)]"></div>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 bg-[#0a0f1e]">
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-3 p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all font-bold uppercase text-xs tracking-widest"
           >
             <LogOut size={18} />
-            {isSidebarOpen && <span>Terminate Session</span>}
+            <span className={`lg:transition-opacity lg:duration-300 ${!isSidebarOpen && 'lg:hidden'}`}>Terminate Session</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'pl-64' : 'pl-20'}`}>
-        <header className="h-20 border-b border-white/5 bg-[#030712]/50 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400">
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/5 rounded-xl">
+      <main className={`flex-1 transition-all duration-300 min-w-0 ${isSidebarOpen ? 'lg:pl-64' : 'lg:pl-20'}`}>
+        <header className="h-20 border-b border-white/5 bg-[#030712]/50 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <div className="hidden xs:flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/5 rounded-xl">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">Gateway: Secure</span>
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Secure Gateway</span>
             </div>
-            
-            <div className="flex items-center gap-4">
+          </div>
+
+          <div className="flex items-center gap-3 sm:gap-6">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-white text-xs font-black uppercase tracking-tight">{user?.name || 'Administrator'}</p>
-                <p className="text-[9px] text-blue-500 font-mono font-bold uppercase tracking-widest">Clearance: Level 9</p>
+                <p className="text-white text-xs font-black uppercase tracking-tight truncate max-w-[120px]">{user?.name || 'Administrator'}</p>
+                <p className="text-[9px] text-blue-500 font-mono font-bold uppercase tracking-widest">Level 9</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-white/5 flex items-center justify-center overflow-hidden">
-                <img src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${user?.email}`} alt="Admin" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${user?.email}`} alt="Admin" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-8 max-w-full overflow-x-hidden">
           <Outlet />
         </div>
       </main>
     </div>
   );
+
 };
 
 export default AdminLayout;

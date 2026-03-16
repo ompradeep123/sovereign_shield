@@ -56,7 +56,7 @@ const AdminDashboard = () => {
     try {
         if (loading || !telemetry) {
             return (
-                <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+                <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4 px-4 text-center">
                     <div className="w-12 h-12 border-2 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
                     <p className="text-blue-500 font-mono text-[10px] uppercase tracking-[0.5em] animate-pulse">Synchronizing Cryptographic Streams...</p>
                 </div>
@@ -64,32 +64,32 @@ const AdminDashboard = () => {
         }
 
         return (
-            <div className="max-w-7xl mx-auto space-y-8 pb-24 animate-scale-in">
+            <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-12 sm:pb-24 animate-scale-in">
                 {/* SOC Header */}
-                <div className="bg-[#0f172a] border border-blue-500/20 rounded-3xl p-8 relative overflow-hidden shadow-xl">
-                    <div className="absolute top-0 right-0 p-4 bg-blue-600/10 border-b border-l border-white/5 rounded-bl-2xl">
-                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Clearance: Level 9 SOC ADMIN</span>
+                <div className="bg-[#0f172a] border border-blue-500/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                    <div className="absolute top-0 right-0 p-3 sm:p-4 bg-blue-600/10 border-b border-l border-white/5 rounded-bl-2xl hidden xs:block">
+                        <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">Clearance: Level 9 SOC ADMIN</span>
                     </div>
-                    <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
+                    <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 sm:gap-8">
                         <div>
-                            <h1 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">SovereignShield SOC</h1>
-                            <p className="text-blue-400 font-mono text-[10px] uppercase tracking-[0.4em] opacity-80">Cybersecurity Operations Hub</p>
+                            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tighter uppercase mb-1 sm:mb-2">SovereignShield SOC</h1>
+                            <p className="text-blue-400 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] opacity-80">Cybersecurity Operations Hub</p>
                         </div>
-                        <div className="flex gap-4">
-                            <div className="bg-black/40 border border-white/5 p-4 rounded-xl text-center min-w-[130px]">
-                                <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Grid Health</div>
-                                <div className="text-lg font-black text-emerald-500 uppercase">ONLINE</div>
+                        <div className="flex flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
+                            <div className="flex-1 lg:flex-none bg-black/40 border border-white/5 p-3 sm:p-4 rounded-xl text-center min-w-[110px] sm:min-w-[130px]">
+                                <div className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-bold mb-1">Grid Health</div>
+                                <div className="text-sm sm:text-lg font-black text-emerald-500 uppercase">ONLINE</div>
                             </div>
-                            <div className="bg-black/40 border border-white/5 p-4 rounded-xl text-center min-w-[130px]">
-                                <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Alert Status</div>
-                                <div className="text-lg font-black text-blue-400 uppercase tracking-tight">NOMINAL</div>
+                            <div className="flex-1 lg:flex-none bg-black/40 border border-white/5 p-3 sm:p-4 rounded-xl text-center min-w-[110px] sm:min-w-[130px]">
+                                <div className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-bold mb-1">Alert Status</div>
+                                <div className="text-sm sm:text-lg font-black text-blue-400 uppercase tracking-tight">NOMINAL</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Quick Metrics */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     {[
                         { label: 'API Throughput', val: `${telemetry?.apiTraffic || 0} r/m`, icon: Zap, color: 'text-yellow-400' },
                         { label: 'Cluster Load', val: `${telemetry?.cpuUsage || 0}%`, icon: Server, color: 'text-blue-400' },
@@ -98,36 +98,36 @@ const AdminDashboard = () => {
                     ].map((m, i) => {
                         const Icon = m.icon;
                         return (
-                            <div key={i} className="bg-[#0f172a] border border-white/5 p-6 rounded-2xl hover:border-blue-500/30 transition-all group shadow-lg">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-2.5 bg-slate-900 rounded-xl">
-                                        <Icon className={m.color} size={20} />
+                            <div key={i} className="bg-[#0f172a] border border-white/5 p-4 sm:p-6 rounded-2xl hover:border-blue-500/30 transition-all group shadow-lg">
+                                <div className="flex justify-between items-start mb-3 sm:mb-4">
+                                    <div className="p-2 sm:p-2.5 bg-slate-900 rounded-xl">
+                                        <Icon className={m.color} size={18} />
                                     </div>
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                                 </div>
-                                <p className="text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">{m.label}</p>
-                                <p className="text-2xl font-black text-white">{m.val}</p>
+                                <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">{m.label}</p>
+                                <p className="text-xl sm:text-2xl font-black text-white">{m.val}</p>
                             </div>
                         );
                     })}
                 </div>
 
                 {/* Command Modules */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                     {MODULES_CONFIG.map((mod, i) => {
                         const Icon = mod.Icon;
                         return (
-                            <Link to={mod.path} key={i} className="group bg-[#0f172a]/95 border border-white/5 p-8 rounded-[2rem] hover:border-blue-500/50 transition-all shadow-xl relative overflow-hidden">
+                            <Link to={mod.path} key={i} className="group bg-[#0f172a]/95 border border-white/5 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] hover:border-blue-500/50 transition-all shadow-xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-[80px] group-hover:bg-blue-600/10"></div>
-                                <div className="flex items-center gap-8 relative z-10 text-white">
-                                    <div className={`w-16 h-16 rounded-2xl bg-black/40 flex items-center justify-center ${mod.color} group-hover:scale-110 transition-transform`}>
-                                        <Icon size={32} />
+                                <div className="flex items-center gap-4 sm:gap-8 relative z-10 text-white">
+                                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-black/40 flex items-center justify-center ${mod.color} group-hover:scale-110 transition-transform flex-shrink-0`}>
+                                        <Icon size={24} className="sm:w-8 sm:h-8" />
                                     </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-black uppercase tracking-tight">{mod.label}</h3>
-                                        <p className="text-sm text-slate-500 font-medium mt-1">{mod.desc}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight truncate">{mod.label}</h3>
+                                        <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 line-clamp-1">{mod.desc}</p>
                                     </div>
-                                    <ChevronRight className="text-slate-800 group-hover:text-blue-500 transition-all" size={24} />
+                                    <ChevronRight className="text-slate-800 group-hover:text-blue-500 transition-all flex-shrink-0" size={20} />
                                 </div>
                             </Link>
                         );
@@ -135,20 +135,20 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Infra Pulse */}
-                <div className="bg-[#0f172a] border border-white/5 rounded-[2rem] p-8 shadow-inner">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 flex items-center px-2">
+                <div className="bg-[#0f172a] border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-inner overflow-hidden">
+                    <h3 className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-4 sm:mb-6 flex items-center px-2">
                         <Database className="mr-3 opacity-50" size={14} /> Service Pulse Matrix
                     </h3>
-                    <div className="space-y-4 px-2">
+                    <div className="space-y-3 sm:space-y-4 px-1 sm:px-2">
                         {(health || []).map((h, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all">
-                                <div className="flex items-center gap-5">
-                                    <div className={`w-2 h-2 rounded-full ${h.status === 'Operational' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-orange-500'}`}></div>
-                                    <span className="text-sm font-bold text-slate-300 uppercase tracking-widest">{h?.service || 'NODE'}</span>
+                            <div key={i} className="flex items-center justify-between p-3 sm:p-4 bg-black/20 rounded-xl sm:rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all gap-4">
+                                <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+                                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${h.status === 'Operational' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-orange-500'}`}></div>
+                                    <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest truncate">{h?.service || 'NODE'}</span>
                                 </div>
-                                <div className="flex items-center gap-8">
-                                    <span className="hidden md:block text-[10px] font-mono text-slate-600 uppercase">Uptime: {h?.uptime || '---'}</span>
-                                    <span className={`text-[11px] font-black uppercase tracking-widest ${h?.status === 'Operational' ? 'text-emerald-500' : 'text-orange-400'}`}>{h?.status || 'OFFLINE'}</span>
+                                <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
+                                    <span className="hidden lg:block text-[10px] font-mono text-slate-600 uppercase">Uptime: {h?.uptime || '---'}</span>
+                                    <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${h?.status === 'Operational' ? 'text-emerald-500' : 'text-orange-400'}`}>{h?.status || 'OFFLINE'}</span>
                                 </div>
                             </div>
                         ))}
