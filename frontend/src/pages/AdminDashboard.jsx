@@ -5,7 +5,6 @@ import {
     ShieldCheck, Smartphone, Eye, LayoutGrid, ChevronRight, Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import BiometricGuard from '../components/BiometricGuard';
 
 const MODULES_CONFIG = [
     { label: 'System Monitoring', path: '/admin/monitoring', Icon: Activity, desc: 'Live Infrastructure Telemetry', color: 'text-blue-400' },
@@ -17,7 +16,6 @@ const MODULES_CONFIG = [
 const AdminDashboard = () => {
     const [telemetry, setTelemetry] = useState(null);
     const [health, setHealth] = useState([]);
-    const [socVerified, setSocVerified] = useState(false);
     const [loading, setLoading] = useState(true);
     const [renderError, setRenderError] = useState(null);
 
@@ -31,7 +29,7 @@ const AdminDashboard = () => {
             setHealth(hlt.data || []);
         } catch (err) {
             console.error('SOC Fetch Error:', err);
-            setTelemetry({}); // Non-null fallback
+            setTelemetry({}); 
             setHealth([]);
         } finally {
             setLoading(false);
@@ -44,39 +42,18 @@ const AdminDashboard = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Safety: Render error catcher
     if (renderError) {
         return (
             <div className="p-20 text-center text-red-500 font-mono">
                 <ShieldAlert size={48} className="mx-auto mb-4" />
                 <h1 className="text-xl font-bold uppercase mb-2">SOC Logic Component Breach</h1>
-                <p className="text-xs opacity-70">A rendering failure occurred in the Command Center. Trace logged to console.</p>
+                <p className="text-xs opacity-70">{renderError}</p>
                 <button onClick={() => setRenderError(null)} className="mt-6 px-4 py-2 bg-red-600 text-white rounded">Retry Initialization</button>
             </div>
         );
     }
 
     try {
-        if (!socVerified) {
-            return (
-                <div className="p-20 flex flex-col items-center justify-center space-y-8 fade-in">
-                    <div className="w-24 h-24 bg-blue-600/10 rounded-full flex items-center justify-center border border-blue-500/20">
-                        <Lock className="text-blue-500" size={40} />
-                    </div>
-                    <div className="text-center">
-                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Identity Confirmation Required</h2>
-                        <p className="text-slate-500 font-mono text-xs uppercase tracking-[0.2em] mt-2">Zero Trust: Re-verify biometrics for Level-9 SOC access</p>
-                    </div>
-                    <BiometricGuard 
-                        isOpen={true} 
-                        serviceName="SOC Central Command" 
-                        onVerified={() => setSocVerified(true)} 
-                        onCancel={() => window.history.back()}
-                    />
-                </div>
-            );
-        }
-
         if (loading || !telemetry) {
             return (
                 <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
@@ -89,7 +66,7 @@ const AdminDashboard = () => {
         return (
             <div className="max-w-7xl mx-auto space-y-8 pb-24 animate-scale-in">
                 {/* SOC Header */}
-                <div className="bg-[#0f172a] border border-blue-500/20 rounded-3xl p-8 relative overflow-hidden">
+                <div className="bg-[#0f172a] border border-blue-500/20 rounded-3xl p-8 relative overflow-hidden shadow-xl">
                     <div className="absolute top-0 right-0 p-4 bg-blue-600/10 border-b border-l border-white/5 rounded-bl-2xl">
                         <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Clearance: Level 9 SOC ADMIN</span>
                     </div>
@@ -121,7 +98,7 @@ const AdminDashboard = () => {
                     ].map((m, i) => {
                         const Icon = m.icon;
                         return (
-                            <div key={i} className="bg-[#0f172a] border border-white/5 p-6 rounded-2xl hover:border-blue-500/30 transition-all group">
+                            <div key={i} className="bg-[#0f172a] border border-white/5 p-6 rounded-2xl hover:border-blue-500/30 transition-all group shadow-lg">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="p-2.5 bg-slate-900 rounded-xl">
                                         <Icon className={m.color} size={20} />
@@ -158,7 +135,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Infra Pulse */}
-                <div className="bg-[#0f172a] border border-white/5 rounded-[2rem] p-8">
+                <div className="bg-[#0f172a] border border-white/5 rounded-[2rem] p-8 shadow-inner">
                     <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 flex items-center px-2">
                         <Database className="mr-3 opacity-50" size={14} /> Service Pulse Matrix
                     </h3>
@@ -180,7 +157,6 @@ const AdminDashboard = () => {
             </div>
         );
     } catch (e) {
-        console.error('Fatal SOC Render Error:', e);
         setRenderError(e.message);
         return null;
     }
