@@ -31,7 +31,8 @@ const DigitalIdentityWallet = () => {
                 localStorage.setItem(`zkp_proofs_${user.id}`, JSON.stringify(generatedProofs));
             }
         } catch (err) {
-            setError('Failed to generate cryptographic proofs');
+            console.error('ZKP Error:', err);
+            setError(err.response?.data?.message || err.response?.data?.error || 'Failed to generate cryptographic proofs');
         }
         setLoading(false);
     };
