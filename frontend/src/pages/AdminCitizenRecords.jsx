@@ -18,13 +18,14 @@ const AdminCitizenRecords = () => {
     }, []);
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-sovNavy flex items-center mb-6"><Users className="text-sovBlue mr-3" size={28}/> Citizen Identity Records</h2>
+        <div className="max-w-7xl mx-auto space-y-6 mt-4">
+            <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/5 p-6 md:p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600 opacity-10 group-hover:opacity-20 transition-opacity duration-700 blur-[120px] rounded-full pointer-events-none"></div>
+                <h2 className="text-3xl font-extrabold text-white flex items-center mb-8 relative z-10 tracking-tight"><Users className="text-blue-400 mr-4 drop-shadow-[0_0_10px_rgba(37,99,235,0.5)]" size={36}/> Citizen Identity Records</h2>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-600">
-                        <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#1e293b]/30 shadow-inner relative z-10">
+                    <table className="w-full text-left text-sm text-slate-300">
+                        <thead className="text-xs text-slate-400 uppercase bg-[#1e293b] border-b border-white/5 font-bold tracking-widest">
                             <tr>
                                 <th className="px-6 py-4">NID</th>
                                 <th className="px-6 py-4">Name</th>
@@ -33,31 +34,31 @@ const AdminCitizenRecords = () => {
                                 <th className="px-6 py-4">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-white/5">
                             {citizens.map(c => (
-                                <tr key={c.id} className="border-b hover:bg-gray-50 bg-white">
-                                    <td className="px-6 py-4 font-mono font-medium text-sovNavy">{c.nid}</td>
-                                    <td className="px-6 py-4 font-semibold text-gray-800">{c.name}</td>
+                                <tr key={c.id} className="hover:bg-[#1e293b]/80 transition-colors group">
+                                    <td className="px-6 py-4 font-mono font-bold text-slate-400">{c.nid}</td>
+                                    <td className="px-6 py-4 font-black text-slate-100 text-base tracking-wide">{c.name}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-wrap gap-2">
                                             {c.attributes && Object.keys(c.attributes).map(attr => (
-                                                 <span key={attr} className="text-[10px] bg-green-50 text-green-700 px-2 py-1 flex items-center rounded border border-green-200 font-bold uppercase tracking-wider">
-                                                     <ShieldCheck size={10} className="mr-1"/> {attr}
+                                                 <span key={attr} className="text-[10px] bg-[#0f172a] text-emerald-400 px-3 py-1.5 flex items-center rounded-lg border border-emerald-500/20 font-bold uppercase tracking-widest shadow-sm">
+                                                     <ShieldCheck size={12} className="mr-1.5 opacity-80"/> {attr}
                                                  </span>
                                             ))}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                         <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold text-xs border border-blue-200">{c.requestCount}</span>
+                                         <span className="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg font-black text-xs border border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)]">{c.requestCount}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">Active</span>
+                                        <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 tracking-widest uppercase">Active</span>
                                     </td>
                                 </tr>
                             ))}
                             {citizens.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">No citizens registered.</td>
+                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500 font-bold bg-[#1e293b]/10 tracking-wide italic">No citizens registered in the network.</td>
                                 </tr>
                             )}
                         </tbody>

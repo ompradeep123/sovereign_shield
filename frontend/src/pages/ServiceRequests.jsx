@@ -59,30 +59,33 @@ const ServiceRequests = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-sovNavy flex items-center mb-6"><Layers className="text-sovBlue mr-3" size={28}/> Government Services</h2>
+        <div className="max-w-5xl mx-auto space-y-8 mt-4 pb-10">
+            <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/5 p-6 md:p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-sovBlue rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"></div>
+                <h2 className="text-3xl font-bold text-slate-100 flex items-center mb-8 relative z-10"><Layers className="text-blue-400 mr-3" size={32}/> Government Services</h2>
                 
                 {message && (
-                    <div className={`p-4 mb-6 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    <div className={`p-4 mb-8 rounded-xl text-sm font-bold relative z-10 shadow-lg ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                         {message.text}
                     </div>
                 )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                     {['Tax Filing', 'Birth Certificate', 'Subsidy Application', 'Health Record Access'].map(service => (
-                        <div key={service} className="border border-gray-200 p-5 rounded-xl hover:border-sovBlue hover:shadow-md transition-all group">
-                            <h3 className="font-semibold text-gray-800 text-lg mb-2">{service}</h3>
-                            <p className="text-sm text-gray-500 mb-4 h-15">
-                                Securely apply for {service.toLowerCase()} using automated ZKP verification.
-                                {service === 'Healthcare Record Access' && <span className="block mt-1 text-xs text-orange-500 font-semibold">(Demo: Will trigger anomaly exception)</span>}
-                            </p>
+                        <div key={service} className="bg-[#1e293b]/50 border border-white/5 p-6 rounded-2xl hover:border-blue-500/50 hover:bg-[#1e293b]/80 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all group flex flex-col justify-between">
+                            <div>
+                                <h3 className="font-bold text-slate-100 text-lg mb-3 leading-tight">{service}</h3>
+                                <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                                    Securely apply using automated <strong className="text-slate-300">ZKP verification</strong>.
+                                    {service === 'Health Record Access' && <span className="block mt-2 text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded inline-block font-bold tracking-wide">(Demo: Triggers Anomaly)</span>}
+                                </p>
+                            </div>
                             <button 
                                 onClick={() => handleRequest(service)}
                                 disabled={loadingType !== null}
-                                className={`w-full font-medium py-2 rounded border transition-colors flex justify-center items-center text-sm ${loadingType === service ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-gray-50 hover:bg-sovBlue hover:text-white text-sovBlue border-gray-200 hover:border-transparent'}`}
+                                className={`w-full font-bold py-3 px-4 rounded-xl border transition-all flex justify-center items-center text-sm shadow-md mt-auto ${loadingType === service ? 'bg-[#0f172a] text-slate-500 border-white/5 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white border-transparent hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:-translate-y-0.5'}`}
                             >
-                                {loadingType === service ? <Clock size={16} className="mr-2 animate-spin"/> : <Plus size={16} className="mr-1"/>}
+                                {loadingType === service ? <Clock size={16} className="mr-2 animate-spin"/> : <Plus size={18} className="mr-2"/>}
                                 {loadingType === service ? 'Processing...' : 'Request'}
                             </button>
                         </div>
@@ -90,60 +93,65 @@ const ServiceRequests = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                 <h3 className="text-xl font-bold text-sovNavy mb-6 border-b pb-4">My Requests & Blockchain Records</h3>
-                 <div className="overflow-x-auto">
-                     <table className="w-full text-left text-sm text-gray-600">
-                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/5 p-6 md:p-8">
+                 <h3 className="text-xl font-bold text-slate-100 mb-6 border-b border-white/5 pb-4 flex items-center">
+                    <div className="p-2 bg-[#1e293b] rounded-lg mr-3 border border-white/5">
+                        <LinkIcon className="h-5 w-5 text-emerald-400"/>
+                    </div>
+                    My Requests & Blockchain Records
+                 </h3>
+                 <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#1e293b]/30">
+                     <table className="w-full text-left text-sm text-slate-300">
+                         <thead className="text-xs text-slate-400 uppercase bg-[#1e293b] border-b border-white/5 font-bold tracking-wider">
                              <tr>
-                                 <th className="px-6 py-3">Service</th>
-                                 <th className="px-6 py-3">Record ID</th>
-                                 <th className="px-6 py-3">Status</th>
-                                 <th className="px-6 py-3">Date</th>
-                                 <th className="px-6 py-3">Blockchain Hash</th>
+                                 <th className="px-6 py-4">Service</th>
+                                 <th className="px-6 py-4">Record ID</th>
+                                 <th className="px-6 py-4">Status</th>
+                                 <th className="px-6 py-4">Date</th>
+                                 <th className="px-6 py-4">Blockchain Hash</th>
                              </tr>
                          </thead>
-                         <tbody>
+                         <tbody className="divide-y divide-white/5">
                              {services.map(s => (
-                                 <tr key={s.id || s.certificate_id} className="border-b hover:bg-gray-50 group">
-                                     <td className="px-6 py-4 font-medium text-gray-900">{s.service_type || s.type}</td>
+                                 <tr key={s.id || s.certificate_id} className="hover:bg-[#1e293b]/80 transition-colors group">
+                                     <td className="px-6 py-4 font-bold text-slate-100">{s.service_type || s.type}</td>
                                      <td className="px-6 py-4">
                                          <div className="flex items-center space-x-2">
-                                             <span className="font-mono text-[10px] text-gray-400">{(s.id || s.certificate_id)?.substring(0, 8)}...</span>
+                                             <span className="font-mono text-xs text-slate-500 bg-[#0f172a] px-2 py-1 rounded border border-white/5 shadow-inner">{(s.id || s.certificate_id)?.substring(0, 8)}...</span>
                                              <button 
                                                  onClick={() => {
                                                      navigator.clipboard.writeText(s.id || s.certificate_id);
                                                      alert('Record ID Copied!');
                                                  }}
-                                                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded text-sovBlue transition-opacity"
+                                                 className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-blue-500/20 hover:text-blue-400 rounded-md text-slate-500 transition-all border border-transparent hover:border-blue-500/30"
                                                  title="Copy Full ID"
                                              >
-                                                 <Copy size={10} />
+                                                 <Copy size={12} />
                                              </button>
                                          </div>
                                      </td>
                                      <td className="px-6 py-4">
-                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold flex w-max items-center ${
-                                             (s.status === 'Approved' || s.data_hash) ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                         <span className={`px-3 py-1.5 rounded-full text-xs font-bold flex w-max items-center shadow-sm border ${
+                                             (s.status === 'Approved' || s.data_hash) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'
                                          }`}>
-                                            {(s.status === 'Approved' || s.data_hash) ? <Check size={12} className="mr-1"/> : <Clock size={12} className="mr-1"/>}
+                                            {(s.status === 'Approved' || s.data_hash) ? <Check size={12} className="mr-1.5"/> : <Clock size={12} className="mr-1.5"/>}
                                             {s.data_hash ? 'Issued (Blockchain)' : (s.status || 'Verified')}
                                          </span>
                                      </td>
-                                     <td className="px-6 py-4 text-xs">{new Date(s.timestamp || s.created_at || new Date()).toLocaleString()}</td>
-                                     <td className="px-6 py-4 font-mono text-xs text-sovBlue">
+                                     <td className="px-6 py-4 text-xs font-medium text-slate-400">{new Date(s.timestamp || s.created_at || new Date()).toLocaleString()}</td>
+                                     <td className="px-6 py-4 font-mono text-xs text-blue-400">
                                          {s.blockHash || s.data_hash ? (
-                                             <div className="flex flex-col space-y-1">
-                                                <div className="flex items-center" title={s.blockHash || s.data_hash}><LinkIcon size={12} className="mr-1"/> {(s.blockHash || s.data_hash).substring(0, 16)}...</div>
-                                                <Link to={`/verify-cert?id=${s.id || s.certificate_id}`} className="text-[10px] text-sovAccent underline hover:text-emerald-600 w-max">Verify Integrity</Link>
+                                             <div className="flex flex-col space-y-1.5">
+                                                <div className="flex items-center bg-[#0f172a] w-max px-2 py-1 rounded border border-white/5" title={s.blockHash || s.data_hash}><LinkIcon size={12} className="mr-1.5 text-slate-500"/> {(s.blockHash || s.data_hash).substring(0, 16)}...</div>
+                                                <Link to={`/verify-cert?id=${s.id || s.certificate_id}`} className="text-[10px] text-emerald-400 underline hover:text-emerald-300 w-max font-bold tracking-wide">Verify Integrity</Link>
                                              </div>
-                                         ) : <span className="text-gray-400 italic">Processing...</span>}
+                                         ) : <span className="text-slate-500 italic">Processing...</span>}
                                      </td>
                                  </tr>
                              ))}
                              {services.length === 0 && (
                                  <tr>
-                                     <td colSpan="4" className="px-6 py-8 text-center text-gray-500 italic">No services requested yet.</td>
+                                     <td colSpan="5" className="px-6 py-12 text-center text-slate-500 italic bg-[#1e293b]/10">No services requested yet. Initiate a request to see records.</td>
                                  </tr>
                              )}
                          </tbody>

@@ -21,10 +21,10 @@ const AdminDashboard = () => {
     if (!stats) return <div className="p-8 text-center text-gray-500 font-mono tracking-widest animate-pulse">LOADING DASHBOARD...</div>;
 
     const navCards = [
-        { label: 'Citizen Records', path: '/admin-citizens', icon: <Users size={24}/>, val: stats.totalUsers, color: 'text-blue-500', bg: 'bg-blue-50' },
-        { label: 'Exception Queue', path: '/admin-exceptions', icon: <AlertTriangle size={24}/>, val: stats.pendingExceptions, color: 'text-orange-500', bg: 'bg-orange-50' },
-        { label: 'Blockchain Integrity', path: '/admin-chain', icon: <LinkIcon size={24}/>, val: `${stats.blockchainHeight} Blocks`, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-        { label: 'Gov Services', path: '/admin-audit', icon: <Layers size={24}/>, val: stats.activeServices, color: 'text-indigo-500', bg: 'bg-indigo-50' }
+        { label: 'Citizen Records', path: '/admin-citizens', icon: <Users size={24}/>, val: stats.totalUsers, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+        { label: 'Exception Queue', path: '/admin-exceptions', icon: <AlertTriangle size={24}/>, val: stats.pendingExceptions, color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+        { label: 'Tracking Ledger', path: '/admin-chain', icon: <LinkIcon size={24}/>, val: `${stats.blockchainHeight} Blocks`, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+        { label: 'Gov Services', path: '/admin-audit', icon: <Layers size={24}/>, val: stats.activeServices, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' }
     ];
 
     return (
@@ -42,25 +42,31 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                  {navCards.map((card, idx) => (
-                      <Link to={card.path} key={idx} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow hover:border-sovBlue group">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${card.bg} ${card.color} group-hover:scale-110 transition-transform`}>
+                      <Link to={card.path} key={idx} className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/5 p-6 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] transition-all hover:border-blue-500/50 hover:-translate-y-1 group relative overflow-hidden">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${card.bg} ${card.color} group-hover:scale-110 transition-transform`}>
                               {card.icon}
                           </div>
-                          <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">{card.label}</h3>
-                          <div className="text-3xl font-bold text-gray-900">{card.val}</div>
+                          <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">{card.label}</h3>
+                          <div className="text-3xl font-extrabold text-white">{card.val}</div>
                       </Link>
                  ))}
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-sovNavy mb-4 flex items-center"><Home className="mr-2 h-5 w-5 text-sovBlue"/> Quick Actions Overview</h3>
-                <div className="text-sm text-gray-600 leading-relaxed max-w-3xl">
-                    <p className="mb-2">Admin Portal gives you root clearance over the SovereignShield digital infrastructure.</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li>Monitor real-time network threats via the <strong>Threat Radar</strong>.</li>
-                        <li>Review anomalous ZKP failures in the <strong>Exception Queue</strong>.</li>
-                        <li>Cryptographically audit the ledger under <strong>Blockchain Integrity</strong>.</li>
-                        <li>Trace citizen service interactions using <strong>Audit Logs</strong>.</li>
+            <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/5 p-6 md:p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-sovBlue rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"></div>
+                <h3 className="text-lg font-bold text-slate-100 mb-6 flex items-center relative z-10">
+                  <div className="p-2 bg-[#1e293b] rounded-lg mr-3 border border-white/5">
+                    <Home className="h-5 w-5 text-blue-400"/>
+                  </div>
+                  System Overview
+                </h3>
+                <div className="text-sm text-slate-400 leading-relaxed max-w-3xl relative z-10 bg-[#1e293b]/30 p-5 rounded-xl border border-white/5">
+                    <p className="mb-4 text-slate-300 font-medium">Admin Portal gives you root clearance over the SovereignShield digital infrastructure.</p>
+                    <ul className="list-disc pl-5 space-y-2">
+                        <li>Monitor real-time network threats via the <strong className="text-emerald-400">Threat Radar</strong>.</li>
+                        <li>Review anomalous ZKP failures in the <strong className="text-orange-400">Exception Queue</strong>.</li>
+                        <li>Cryptographically audit the ledger under <strong className="text-blue-400">Tracking Ledger</strong>.</li>
+                        <li>Trace citizen service interactions using <strong className="text-indigo-400">Audit Logs</strong>.</li>
                     </ul>
                 </div>
             </div>

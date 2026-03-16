@@ -21,30 +21,38 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-sovNavy flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div className="p-8 pb-4 text-center border-b border-gray-100">
-           <Fingerprint className="h-12 w-12 text-sovBlue mx-auto mb-2" />
-           <h2 className="text-2xl font-bold text-sovNavy">Identity Onboarding</h2>
-           <p className="text-sm text-gray-500">Decentralized Trust Network</p>
+    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full bg-[#030712] z-0 pointer-events-none flex items-center justify-center">
+          <div className="w-[800px] h-[800px] bg-blue-600/10 blur-[150px] rounded-full"></div>
+      </div>
+      
+      <div className="max-w-md w-full bg-[#0f172a]/80 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/10 relative z-10 group hover:shadow-[0_0_40px_rgba(37,99,235,0.15)] transition-all duration-700">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-emerald-400 to-blue-600"></div>
+        <div className="bg-[#1e293b]/50 border-b border-white/5 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full"></div>
+           <Fingerprint className="h-16 w-16 text-emerald-400 mb-3 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)] relative z-10" />
+           <h2 className="text-3xl font-black text-white tracking-tight relative z-10">Identity <span className="text-emerald-400">Onboarding</span></h2>
+           <p className="text-xs text-slate-400 mt-2 uppercase tracking-[0.2em] text-center font-bold bg-black/20 px-3 py-1 rounded-full border border-white/5 relative z-10">Decentralized Trust Network</p>
         </div>
         
         <form onSubmit={handleRegister} className="p-8 space-y-5">
-          {error && <div className="bg-red-50 text-red-600 p-3 text-sm rounded shadow-inner">{error}</div>}
-          {success && <div className="bg-green-50 text-green-700 p-3 text-sm rounded shadow-inner flex items-center"><ShieldCheck size={16} className="mr-2"/> Registration Approved</div>}
+          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-center justify-center">{error}</div>}
+          {success && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-4 text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.1)] flex items-center justify-center"><ShieldCheck size={18} className="mr-3"/> Registration Approved</div>}
           
-          <input type="email" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Email Address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-          <input type="text" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
-          <input type="text" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="National ID (NID)" value={form.nid} onChange={e => setForm({...form, nid: e.target.value})} />
-          <input type="password" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Strong Password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
+          <div className="space-y-4">
+              <input type="email" required className="w-full px-5 py-3.5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all outline-none bg-[#1e293b]/50 text-white font-medium placeholder-slate-600 shadow-inner" placeholder="Email Address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+              <input type="text" required className="w-full px-5 py-3.5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all outline-none bg-[#1e293b]/50 text-white font-medium placeholder-slate-600 shadow-inner" placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+              <input type="text" required className="w-full px-5 py-3.5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all outline-none bg-[#1e293b]/50 text-white font-medium placeholder-slate-600 shadow-inner" placeholder="National ID (NID)" value={form.nid} onChange={e => setForm({...form, nid: e.target.value})} />
+              <input type="password" required className="w-full px-5 py-3.5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all outline-none bg-[#1e293b]/50 text-white font-medium placeholder-slate-600 shadow-inner tracking-widest" placeholder="Strong Password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
+          </div>
 
-          <button type="submit" className="w-full bg-sovBlue hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 shadow-lg transition-transform hover:scale-105">
+          <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black py-4 px-4 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center space-x-3 hover:-translate-y-0.5 uppercase tracking-widest text-sm border border-blue-400 mt-8">
              <UserPlus size={18} />
              <span>Create Identity</span>
           </button>
           
-          <p className="text-center text-sm text-gray-500 mt-4">
-             Already registered? <Link to="/login" className="text-sovBlue font-medium hover:underline">Access Portal</Link>
+          <p className="text-center text-sm text-slate-400 mt-6 font-medium">
+             Already registered? <Link to="/login" className="text-blue-400 font-bold hover:text-blue-300 transition-colors bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20 ml-2">Access Portal</Link>
           </p>
         </form>
       </div>

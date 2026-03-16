@@ -97,19 +97,19 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F9FC] relative z-0 w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-50 to-[#F7F9FC]">
-        <header className="h-16 glass-panel shadow-[0_2px_10px_rgba(0,0,0,0.03)] border-b border-gray-200/50 flex flex-col justify-center px-4 md:px-8 z-10 shrink-0 sticky top-0">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#030712] relative z-0 w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] to-[#030712]">
+        <header className="h-16 glass-panel shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-b border-white/5 flex flex-col justify-center px-4 md:px-8 z-10 shrink-0 sticky top-0">
           <div className="flex items-center">
             <button 
-              className="mr-3 md:hidden p-2 -ml-2 text-sovNavy hover:bg-gray-100 rounded-lg transition-colors"
+              className="mr-3 md:hidden p-2 -ml-2 text-gray-300 hover:bg-white/10 rounded-lg transition-colors"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu size={24} />
             </button>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg md:text-xl font-semibold text-sovNavy tracking-tight truncate">E-Governance Secure Gateway</h2>
-              <div className="hidden md:flex items-center text-xs space-x-2 text-gray-500 mt-0.5">
-                 <span className="flex items-center"><div className="w-2 h-2 rounded-full bg-green-500 mr-1 badge-secure"></div> Secure Connection</span>
+              <h2 className="text-lg md:text-xl font-bold text-white tracking-tight truncate">E-Governance Secure Gateway</h2>
+              <div className="hidden md:flex items-center text-xs space-x-2 text-gray-400 mt-0.5">
+                 <span className="flex items-center"><div className="w-2 h-2 rounded-full bg-emerald-500 mr-1 badge-secure"></div> Secure Connection</span>
                  <span>|</span>
                  <span>Zero Trust Architecture</span>
                  <span>|</span>
