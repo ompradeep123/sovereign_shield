@@ -18,20 +18,19 @@ const AdminLogin = () => {
     setIsAuthenticating(true);
     
     try {
-      const { data, error: loginError } = await login(email, password);
+      const response = await login(email, password);
+      // login returns { user, session } from authService.js
       
-      const user = data?.user;
+      const user = response?.user;
       const role = user?.user_metadata?.role || user?.app_metadata?.role || user?.role;
 
-      if (loginError) {
-        setError(loginError.message);
-      } else if (role !== 'admin') {
+      if (role !== 'admin') {
         setError('SEC_VIOLATION: Non-administrative account detected. Access Denied.');
       } else {
         navigate('/admin');
       }
     } catch (err) {
-      setError('System connection failure. Please try again.');
+      setError(err.message || 'System connection failure. Please try again.');
     } finally {
       setIsAuthenticating(false);
     }
