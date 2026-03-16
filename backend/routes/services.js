@@ -4,14 +4,20 @@ const crypto = require('crypto');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { generateZKP, verifyZKP } = require('../zkp/zkpSim');
 const govChain = require('../blockchain/hashChain');
-const { services, users, accessLogs } = require('../db/mockDb');
+const { services, users, accessLogs, exceptions } = require('../db/mockDb');
 
 router.use(verifyToken);
 
 // Digital Identity Wallet: Request ZKP (Zero Knowledge Proof) properties
 router.get('/wallet/zkp', (req, res) => {
-  const user = users.find(u => u.id === req.user.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
+  let user = users.find(u => u.id === req.user.id);
+  if (!user) {
+    // Map new Supabase users contextually for the hackathon ZKP demo
+    user = {
+        id: req.user.id,
+        attributes: { age: 34, citizenship: 'Verified Native', incomeEligibility: 'Eligible Tier 1' }
+    };
+  }
   
   const proofs = [
     { property: 'Age Verified', proof: generateZKP('Age', user.attributes.age) },
@@ -38,20 +44,40 @@ router.post('/verify-proof', (req, res) => {
 
 // Request Gov Service
 router.post('/request', (req, res) => {
-    const { serviceType } = req.body;
+    const { serviceType, simulateAnomaly } = req.body;
     
-    // Simulate auto-approval & Blockchain entry
     const newService = {
         id: crypto.randomUUID(),
         userId: req.user.id,
         type: serviceType,
-        status: 'Approved',
+        status: simulateAnomaly ? 'Exception Pending' : 'Approved',
         timestamp: new Date().toISOString()
     };
     
     services.push(newService);
+
+    if (simulateAnomaly) {
+        exceptions.push({
+            id: crypto.randomUUID(),
+            serviceId: newService.id,
+            userId: req.user.id,
+            type: serviceType,
+            reason: 'ZKP Signature Mismatch detected at API Gateway',
+            timestamp: new Date().toISOString(),
+            status: 'Pending Admin Review'
+        });
+        threatLogs && threatLogs.push({
+             timestamp: new Date().toISOString(),
+             severity: 'MEDIUM',
+             message: 'Anomaly detected during service request: ZKP Mismatch',
+             path: '/api/services/request',
+             ip: req.ip || 'INTERNAL'
+        });
+        accessLogs.push({ userId: req.user.id, timestamp: new Date().toISOString(), service: serviceType, reason: 'Service Request flagged for Manual Review' });
+        return res.status(202).json({ message: 'Request flagged due to anomaly. Forwarded to Admin Exception Queue.', service: newService });
+    }
     
-    // Create immutable block
+    // Create immutable block for approved request
     const blockData = {
         recordId: newService.id,
         userNID: req.user.nid,

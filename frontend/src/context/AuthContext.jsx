@@ -1,14 +1,17 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
+import { signIn, signOut } from '../services/authService';
 
-// Create Axios Instance with Authorization Middleware
 export const api = axios.create({
   baseURL: 'http://localhost:5000/api'
 });
 
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(async config => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+     config.headers.Authorization = `Bearer ${session.access_token}`;
+  }
   return config;
 });
 
@@ -19,29 +22,29 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulated token restore
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    
-    setIsLoading(false);
+    // Restore session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const authUser = session?.user ? { ...session.user, ...session.user.user_metadata } : null;
+      setUser(authUser);
+      setIsLoading(false);
+    });
+
+    // Listen to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const authUser = session?.user ? { ...session.user, ...session.user.user_metadata } : null;
+      setUser(authUser);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (nid, password) => {
-    const res = await api.post('/auth/login', { nid, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
-    return res.data;
+  const login = async (email, password) => {
+    return await signIn(email, password);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    await signOut();
   };
 
   return (
@@ -50,3 +53,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

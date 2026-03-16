@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const authRoutes = require('./routes/auth');
 const serviceRoutes = require('./routes/services');
 const adminRoutes = require('./routes/admin');
 const { logActivity } = require('./middleware/logger');
@@ -29,7 +28,6 @@ app.use(limiter);
 app.use(logActivity);
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/admin', adminRoutes);
 

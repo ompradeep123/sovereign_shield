@@ -8,6 +8,7 @@ const services = [];
 const hashChain = [];
 const accessLogs = [];
 const threatLogs = [];
+const exceptions = [];
 
 // Helper to hash passwords and strings
 const hashString = (str) => crypto.createHash('sha256').update(str).digest('hex');
@@ -36,5 +37,6 @@ module.exports = {
   hashChain,
   accessLogs,
   threatLogs,
+  exceptions,
   hashString
 };

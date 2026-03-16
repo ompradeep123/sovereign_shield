@@ -22,7 +22,7 @@ const ServiceRequests = () => {
     const handleRequest = async (type) => {
         setLoading(true);
         try {
-            await api.post('/services/request', { serviceType: type });
+            await api.post('/services/request', { serviceType: type, simulateAnomaly: type === 'Healthcare Record Access' });
             await fetchServices();
         } catch (err) {
             console.error('Request failed', err);
@@ -39,7 +39,10 @@ const ServiceRequests = () => {
                     {['Tax Filing', 'Birth Certificate', 'Subsidy Application', 'Health Record Access'].map(service => (
                         <div key={service} className="border border-gray-200 p-5 rounded-xl hover:border-sovBlue hover:shadow-md transition-all group">
                             <h3 className="font-semibold text-gray-800 text-lg mb-2">{service}</h3>
-                            <p className="text-sm text-gray-500 mb-4 h-10">Securely apply for {service.toLowerCase()} using automated ZKP verification.</p>
+                            <p className="text-sm text-gray-500 mb-4 h-15">
+                                Securely apply for {service.toLowerCase()} using automated ZKP verification.
+                                {service === 'Healthcare Record Access' && <span className="block mt-1 text-xs text-orange-500 font-semibold">(Demo: Will trigger anomaly exception)</span>}
+                            </p>
                             <button 
                                 onClick={() => handleRequest(service)}
                                 disabled={loading}

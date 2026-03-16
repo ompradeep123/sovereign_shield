@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, UserPlus, Fingerprint } from 'lucide-react';
-import { api } from '../context/AuthContext';
+import { signUp } from '../services/authService';
 
 const Register = () => {
-  const [form, setForm] = useState({ nid: '', name: '', password: '' });
+  const [form, setForm] = useState({ email: '', nid: '', name: '', password: '' });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
@@ -12,11 +12,11 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', form);
+      await signUp(form.email, form.password, { role: 'citizen', nid: form.nid, name: form.name });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.message || 'Registration failed');
     }
   };
 
@@ -33,6 +33,7 @@ const Register = () => {
           {error && <div className="bg-red-50 text-red-600 p-3 text-sm rounded shadow-inner">{error}</div>}
           {success && <div className="bg-green-50 text-green-700 p-3 text-sm rounded shadow-inner flex items-center"><ShieldCheck size={16} className="mr-2"/> Registration Approved</div>}
           
+          <input type="email" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Email Address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
           <input type="text" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
           <input type="text" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="National ID (NID)" value={form.nid} onChange={e => setForm({...form, nid: e.target.value})} />
           <input type="password" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sovBlue outline-none bg-gray-50" placeholder="Strong Password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} />

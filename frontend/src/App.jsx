@@ -14,6 +14,12 @@ import TrustTimeline from './pages/TrustTimeline';
 import AdminRadar from './pages/AdminRadar';
 import SystemStatus from './pages/SystemStatus';
 import DisasterRecovery from './pages/DisasterRecovery';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminExceptionQueue from './pages/AdminExceptionQueue';
+import AdminCitizenRecords from './pages/AdminCitizenRecords';
+import AdminBlockchainIntegrity from './pages/AdminBlockchainIntegrity';
+import AdminAuditLogs from './pages/AdminAuditLogs';
+import AdminManagement from './pages/AdminManagement';
 
 function App() {
   return (
@@ -30,6 +36,12 @@ function App() {
             <Route path="/services" element={<ServiceRequests />} />
             <Route path="/verify-cert" element={<VerifyCertificate />} />
             <Route path="/timeline" element={<TrustTimeline />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-exceptions" element={<AdminExceptionQueue />} />
+            <Route path="/admin-citizens" element={<AdminCitizenRecords />} />
+            <Route path="/admin-chain" element={<AdminBlockchainIntegrity />} />
+            <Route path="/admin-audit" element={<AdminAuditLogs />} />
+            <Route path="/admin-management" element={<AdminManagement />} />
             <Route path="/admin-radar" element={<AdminRadar />} />
             <Route path="/system-status" element={<SystemStatus />} />
             <Route path="/disaster-recovery" element={<DisasterRecovery />} />

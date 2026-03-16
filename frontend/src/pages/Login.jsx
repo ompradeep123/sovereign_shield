@@ -4,7 +4,7 @@ import { ShieldCheck, Lock, User, KeyRound } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
-  const [nid, setNid] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ const Login = () => {
     setError(null);
     try {
       if (otp !== '123456') throw new Error('Invalid MFA Token (Demo: use 123456)');
-      await login(nid, password);
+      await login(email, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Login failed');
@@ -36,12 +36,12 @@ const Login = () => {
           {error && <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 text-sm rounded shadow-sm flex items-center"><Lock size={16} className="mr-2"/>{error}</div>}
           
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700 flex items-center"><User size={16} className="mr-2 text-sovBlue"/> National ID</label>
+            <label className="text-sm font-medium text-gray-700 flex items-center"><User size={16} className="mr-2 text-sovBlue"/> Email Address</label>
             <input 
-              type="text" required
+              type="email" required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sovBlue focus:border-transparent transition-all outline-none bg-gray-50 text-sovNavy font-medium" 
-              placeholder="e.g. NID-84729"
-              value={nid} onChange={e => setNid(e.target.value)} 
+              placeholder="e.g. citizen@sovereign.gov"
+              value={email} onChange={e => setEmail(e.target.value)} 
             />
           </div>
 
