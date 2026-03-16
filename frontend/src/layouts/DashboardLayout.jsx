@@ -44,7 +44,7 @@ const DashboardLayout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-72 md:w-64 bg-sovNavy text-white flex flex-col shadow-2xl z-50 transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-72 md:w-64 glass-dark text-white flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.15)] z-50 transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
           <div className="flex items-center">
             <ShieldCheck className="h-8 w-8 text-sovAccent mr-2 shrink-0" />
@@ -63,8 +63,8 @@ const DashboardLayout = () => {
                   key={item.name}
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive ? 'bg-sovBlue text-white shadow-md' : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                    isActive ? 'bg-gradient-to-r from-sovBlue to-blue-600 text-white shadow-[0_4px_12px_rgba(29,78,216,0.3)] transform scale-[1.02]' : 'text-gray-400 hover:bg-white/10 hover:text-white hover:translate-x-1'
                   }`}
                 >
                   <div className={`${isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
@@ -97,8 +97,8 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F9FC] relative z-0 w-full">
-        <header className="h-16 bg-white shadow-sm border-b border-gray-200 flex flex-col justify-center px-4 md:px-8 z-10 shrink-0 sticky top-0">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F9FC] relative z-0 w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-50 to-[#F7F9FC]">
+        <header className="h-16 glass-panel shadow-[0_2px_10px_rgba(0,0,0,0.03)] border-b border-gray-200/50 flex flex-col justify-center px-4 md:px-8 z-10 shrink-0 sticky top-0">
           <div className="flex items-center">
             <button 
               className="mr-3 md:hidden p-2 -ml-2 text-sovNavy hover:bg-gray-100 rounded-lg transition-colors"

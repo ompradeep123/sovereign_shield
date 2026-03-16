@@ -48,26 +48,27 @@ const VerifyCertificate = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-sovNavy text-white p-6 pb-8 border-b-4 border-sovAccent">
-                    <h2 className="text-2xl font-bold flex items-center mb-2"><Crosshair className="mr-3" size={28}/> Verify Certificate Integrity</h2>
-                    <p className="text-gray-300 text-sm">Every government service request is logged into the Sovereign Hash Chain. Input a Record ID to cryptographically verify its integrity and origin.</p>
+        <div className="max-w-4xl mx-auto space-y-8 mt-4 pb-10">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sovNavy via-[#0a192f] to-[#040b14] text-white p-8 md:p-12 border-b-4 border-sovAccent relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-sovAccent blur-[100px] rounded-full opacity-10 pointer-events-none"></div>
+                    <h2 className="text-3xl font-extrabold flex items-center mb-3 relative z-10"><Crosshair className="mr-3 text-sovAccent" size={32}/> Verify Certificate Integrity</h2>
+                    <p className="text-blue-100/80 text-sm md:text-base leading-relaxed relative z-10 max-w-2xl">Every government service request is logged into the Sovereign Hash Chain. Input a Record ID below to cryptographically verify its integrity, origin, and immutability.</p>
                 </div>
                 
-                <form onSubmit={handleVerify} className="p-8 -mt-6">
-                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                        <label className="text-sm font-semibold text-gray-700 block mb-2 text-center tracking-widest uppercase">Target Record ID</label>
+                <form onSubmit={handleVerify} className="p-6 md:p-10 -mt-8 relative z-20">
+                    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-100">
+                        <label className="text-sm font-bold text-gray-800 block mb-4 tracking-widest uppercase flex items-center"><Search size={16} className="mr-2 text-sovBlue"/> Target Record ID</label>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-0">
                            <input type="text"
                                required
                                placeholder="e.g. 550e8400-e29b-..."
-                               className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg sm:rounded-r-none outline-none focus:ring-2 focus:ring-sovBlue focus:border-transparent font-mono text-sm w-full"
+                               className="flex-1 px-5 py-4 bg-gray-50/50 border-2 border-gray-200 rounded-xl sm:rounded-r-none outline-none focus:ring-0 focus:border-sovBlue focus:bg-white font-mono text-sm w-full transition-all duration-300"
                                value={recordId}
                                onChange={(e) => setRecordId(e.target.value)}
                            />
-                           <button type="submit" disabled={loading} className="bg-sovBlue hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg sm:rounded-l-none shadow-md transition-colors flex items-center justify-center w-full sm:w-auto shrink-0">
-                              {loading ? <Cpu className="animate-spin mr-2" /> : <Search className="mr-2"/>} {loading ? 'Verifying...' : 'Verify'}
+                           <button type="submit" disabled={loading} className="bg-sovBlue hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl sm:rounded-l-none shadow-[0_4px_14px_0_rgba(29,78,216,0.39)] hover:shadow-[0_6px_20px_rgba(29,78,216,0.23)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center w-full sm:w-auto shrink-0 z-10">
+                              {loading ? <Cpu className="animate-spin mr-2" /> : <ShieldCheck className="mr-2"/>} {loading ? 'Verifying...' : 'Verify Hash'}
                            </button>
                         </div>
                     </div>
