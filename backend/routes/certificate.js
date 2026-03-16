@@ -32,10 +32,11 @@ router.post('/birth-certificate', verifyToken, async (req, res) => {
         // 3. Store on Polygon Blockchain
         const txHash = await storeHashOnBlockchain(request.id, dataHash);
 
-        // 4. Save certificate to database
+        // 4. Save certificate to database - Use request.id as certificate_id for 1:1 mapping
         const { data: cert, error: certErr } = await supabase
             .from('certificates')
             .insert({
+                certificate_id: request.id,
                 citizen_id: citizenId,
                 service_type: 'Birth Certificate',
                 data_hash: dataHash
@@ -74,13 +75,31 @@ router.get('/verify/:certId', async (req, res) => {
         const { certId } = req.params;
         
         // 1. Fetch certificate from DB
-        const { data: cert, error: certErr } = await supabase
+        let { data: cert, error: certErr } = await supabase
             .from('certificates')
             .select('*')
             .eq('certificate_id', certId)
             .single();
             
-        if (certErr || !cert) return res.status(404).json({ valid: false, message: 'Certificate not found in database' });
+        // If not found in certificates, check service_requests (could be another type of verifiable record)
+        if (!cert) {
+            const { data: requestRecord } = await supabase
+                .from('blockchain_records')
+                .select('*, service_requests(service_type, created_at)')
+                .eq('record_id', certId)
+                .single();
+            
+            if (requestRecord) {
+                cert = {
+                    certificate_id: certId,
+                    service_type: requestRecord.service_requests.service_type,
+                    data_hash: requestRecord.hash,
+                    created_at: requestRecord.service_requests.created_at
+                };
+            }
+        }
+            
+        if (!cert) return res.status(404).json({ valid: false, message: 'Certificate or Record not found in database' });
 
         // 2. We use the service_requests id to verify on blockchain, since our schema models record_id matching request
         // Lookup the associated record. For simplicity of the mock, let's use the DB hash to check Blockchain.

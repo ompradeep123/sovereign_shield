@@ -73,7 +73,7 @@ const VerifyCertificate = () => {
                     </div>
                 </form>
 
-                {result && (
+                {result && result.valid && (
                     <div className="px-8 pb-8">
                         <div className="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-8 flex flex-col items-center text-center shadow-inner relative overflow-hidden">
                             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #10b981 10px, #10b981 20px)' }}></div>
@@ -84,13 +84,23 @@ const VerifyCertificate = () => {
                             <div className="bg-white w-full rounded-lg shadow border border-emerald-200 text-left overflow-hidden z-10 text-sm">
                                 <div className="bg-emerald-100 px-4 py-2 font-semibold text-emerald-800 border-b border-emerald-200 border-dashed">Polygon Smart Contract Extracted Metadata</div>
                                 <div className="p-4 font-mono text-xs text-gray-600 space-y-2">
-                                    <p><span className="text-gray-400">Timestamp:</span> {new Date(result.certificate.created_at).toLocaleString()}</p>
+                                    <p><span className="text-gray-400">Timestamp:</span> {result.certificate?.created_at ? new Date(result.certificate.created_at).toLocaleString() : 'N/A'}</p>
                                     <p><span className="text-gray-400">Previous Tx Hash:</span> N/A (Stored On-Chain)</p>
-                                    <p className="break-all"><span className="text-gray-400">Current Hash:</span> {result.certificate.data_hash}</p>
-                                    <p><span className="text-gray-400">Service:</span> {result.certificate.service_type}</p>
+                                    <p className="break-all"><span className="text-gray-400">Current Hash:</span> {result.certificate?.data_hash || 'N/A'}</p>
+                                    <p><span className="text-gray-400">Service:</span> {result.certificate?.service_type || 'N/A'}</p>
                                     <p><span className="text-gray-400">Status:</span> Verified ✔</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {result && !result.valid && (
+                    <div className="px-8 pb-8">
+                        <div className="bg-red-50 border-2 border-red-500 rounded-xl p-8 flex flex-col items-center text-center shadow-inner">
+                            <XCircle className="text-red-500 h-20 w-20 mb-4 animate-bounce" />
+                            <h3 className="text-2xl font-bold text-red-800 mb-2">{result.message || 'Verification Failed'}</h3>
+                            <p className="text-red-700">The requested record either does not exist or has been tampered with. The hash chain verification failed.</p>
                         </div>
                     </div>
                 )}
