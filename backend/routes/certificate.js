@@ -3,9 +3,10 @@ const router = express.Router();
 const crypto = require('crypto');
 const supabase = require('../lib/supabaseClient');
 const { storeHashOnBlockchain, verifyHashOnBlockchain } = require('../blockchain/blockchainService');
+const { verifyToken } = require('../middleware/authMiddleware');
 
 // Create Birth Certificate
-router.post('/birth-certificate', async (req, res) => {
+router.post('/birth-certificate', verifyToken, async (req, res) => {
     try {
         const citizenId = req.user.id;
         // 1. Create Service Request Note
@@ -51,7 +52,7 @@ router.post('/birth-certificate', async (req, res) => {
 
         // 6. Log Audit Event
         await supabase.from('audit_logs').insert({
-            action: 'Birth Certificate Generation & Ledged to Polygon',
+            action: '[DATA_ACCESSED: Name, Date of Birth, Blockchain Hash] Birth Certificate Generation & Ledged to Polygon',
             user_id: citizenId
         });
 
@@ -88,7 +89,7 @@ router.get('/verify/:certId', async (req, res) => {
         if (isBlockchainValid) {
             // Log verification audit (anonymously or by citizen)
             if (req.user) {
-                await supabase.from('audit_logs').insert({ action: 'Certificate Integrity Verified', user_id: req.user.id });
+                await supabase.from('audit_logs').insert({ action: '[DATA_ACCESSED: Certificate File, Registration Cryptographic Hash] Certificate Integrity Verified', user_id: req.user.id });
             }
             res.json({ valid: true, message: 'Certificate cryptographically verified against Polygon Ledger', certificate: cert });
         } else {

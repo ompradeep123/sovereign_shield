@@ -20,7 +20,7 @@ router.get('/verify', async (req, res) => {
 
         // Ensure trust timeline audibility
         await supabase.from('audit_logs').insert({
-            action: 'Zero-Knowledge Proofs generated for Service Eligibility',
+            action: '[DATA_ACCESSED: Date of Birth, National ID] Zero-Knowledge Proofs generated for Service Eligibility',
             user_id: citizenId
         });
 

@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../context/AuthContext';
+import { api, AuthContext } from '../context/AuthContext';
 import { KeyRound, CheckCircle, ShieldAlert, Fingerprint } from 'lucide-react';
 
 const DigitalIdentityWallet = () => {
+    const { user } = React.useContext(AuthContext);
     const [proofs, setProofs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Load persistent proofs from the browser's designated local wallet storage layer
+    useEffect(() => {
+        if (user?.id) {
+            const savedProofs = localStorage.getItem(`zkp_proofs_${user.id}`);
+            if (savedProofs) {
+                setProofs(JSON.parse(savedProofs));
+            }
+        }
+    }, [user]);
 
     const generateProofs = async () => {
         setLoading(true);
         setError(null);
         try {
             const res = await api.get('/eligibility/verify');
-            setProofs(res.data.proofs);
+            const generatedProofs = res.data.proofs;
+            setProofs(generatedProofs);
+            
+            // Persist the cryptographically generated zero-knowledge proofs to local wallet
+            if (user?.id) {
+                localStorage.setItem(`zkp_proofs_${user.id}`, JSON.stringify(generatedProofs));
+            }
         } catch (err) {
             setError('Failed to generate cryptographic proofs');
         }
@@ -47,14 +64,14 @@ const DigitalIdentityWallet = () => {
                             <div className="absolute top-0 left-0 w-1 h-full bg-sovAccent"></div>
                             <div className="flex justify-between items-center mb-3">
                                 <h3 className="font-semibold text-gray-800 text-base">{p.property}</h3>
-                                <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center"><CheckCircle size={14} className="mr-1"/> {p.status}</span>
+                                <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center"><CheckCircle size={14} className="mr-1"/> {p.proof?.status || 'Verified'}</span>
                             </div>
                             <div className="bg-gray-50 p-3 rounded border border-gray-100 mb-2 font-mono text-xs text-gray-600 break-all">
-                                {p.proofValue}
+                                {p.proof?.proofValue || 'Generative Error'}
                             </div>
                             <div className="text-xs text-gray-400 flex justify-between">
-                                <span>Verification Key: {p.verificationKey.substring(0,8)}...</span>
-                                <span>{new Date(p.verifiedAt).toLocaleTimeString()}</span>
+                                <span>Verification Key: {p.proof?.verificationKey?.substring(0,8) || 'N/A'}...</span>
+                                <span>{p.proof?.verifiedAt ? new Date(p.proof.verifiedAt).toLocaleTimeString() : 'N/A'}</span>
                             </div>
                         </div>
                     ))}

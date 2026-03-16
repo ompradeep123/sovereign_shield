@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 import { ShieldCheck, Crosshair, Cpu, XCircle, Search } from 'lucide-react';
 
@@ -7,6 +8,29 @@ const VerifyCertificate = () => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const idFromUrl = queryParams.get('id');
+        if (idFromUrl) {
+            setRecordId(idFromUrl);
+            autoVerify(idFromUrl);
+        }
+    }, [location]);
+
+    const autoVerify = async (id) => {
+        setLoading(true);
+        setError(null);
+        setResult(null);
+        try {
+            const res = await api.get(`/certificates/verify/${id}`);
+            setResult(res.data);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Verification Error');
+        }
+        setLoading(false);
+    };
 
     const handleVerify = async (e) => {
         e.preventDefault();

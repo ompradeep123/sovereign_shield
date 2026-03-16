@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { generateZKP, verifyZKP } = require('../zkp/zkpSim');
 const govChain = require('../blockchain/hashChain');
-const { services, users, accessLogs, exceptions } = require('../db/mockDb');
+const { services, users, accessLogs, exceptions, threatLogs } = require('../db/mockDb');
 
 router.use(verifyToken);
 
@@ -43,54 +43,70 @@ router.post('/verify-proof', (req, res) => {
 });
 
 // Request Gov Service
-router.post('/request', (req, res) => {
-    const { serviceType, simulateAnomaly } = req.body;
-    
-    const newService = {
-        id: crypto.randomUUID(),
-        userId: req.user.id,
-        type: serviceType,
-        status: simulateAnomaly ? 'Exception Pending' : 'Approved',
-        timestamp: new Date().toISOString()
-    };
-    
-    services.push(newService);
-
-    if (simulateAnomaly) {
-        exceptions.push({
-            id: crypto.randomUUID(),
-            serviceId: newService.id,
-            userId: req.user.id,
-            type: serviceType,
-            reason: 'ZKP Signature Mismatch detected at API Gateway',
-            timestamp: new Date().toISOString(),
-            status: 'Pending Admin Review'
-        });
-        threatLogs && threatLogs.push({
-             timestamp: new Date().toISOString(),
-             severity: 'MEDIUM',
-             message: 'Anomaly detected during service request: ZKP Mismatch',
-             path: '/api/services/request',
-             ip: req.ip || 'INTERNAL'
-        });
-        accessLogs.push({ userId: req.user.id, timestamp: new Date().toISOString(), service: serviceType, reason: 'Service Request flagged for Manual Review' });
-        return res.status(202).json({ message: 'Request flagged due to anomaly. Forwarded to Admin Exception Queue.', service: newService });
+router.post('/request', async (req, res) => {
+    try {
+        const { serviceType, simulateAnomaly } = req.body;
+        const supabase = require('../lib/supabaseClient');
+        
+        if (simulateAnomaly) {
+            // Write to mock DB for backward compat with admin anomaly queue
+            const newService = {
+                id: crypto.randomUUID(),
+                userId: req.user.id,
+                type: serviceType,
+                status: 'Exception Pending',
+                timestamp: new Date().toISOString()
+            };
+            services.push(newService);
+            exceptions.push({
+                id: crypto.randomUUID(),
+                serviceId: newService.id,
+                userId: req.user.id,
+                type: serviceType,
+                reason: 'ZKP Signature Mismatch detected at API Gateway',
+                timestamp: new Date().toISOString(),
+                status: 'Pending Admin Review'
+            });
+            threatLogs && threatLogs.push({
+                 timestamp: new Date().toISOString(),
+                 severity: 'MEDIUM',
+                 message: 'Anomaly detected during service request: ZKP Mismatch',
+                 path: '/api/services/request',
+                 ip: req.ip || 'INTERNAL'
+            });
+            
+            // Also write threat to Supabase
+            await supabase.from('threat_logs').insert({
+                 event_type: 'Anomaly detected: ZKP Mismatch',
+                 severity: 'MEDIUM',
+                 ip_address: req.ip || 'INTERNAL'
+            }).catch(() => {});
+            
+            return res.status(202).json({ message: 'Request flagged due to anomaly. Forwarded to Admin Exception Queue.', service: newService });
+        }
+        
+        // Write to Supabase definitively
+        const { data: newService, error } = await supabase
+            .from('service_requests')
+            .insert({
+                citizen_id: req.user.id,
+                service_type: serviceType,
+                status: 'Approved'
+            }).select().single();
+            
+        if (error) throw error;
+        
+        // Write Audit Log
+        const dataTag = serviceType === 'Subsidy Application' ? '[DATA_ACCESSED: Financial Records, Family Size]' : '[DATA_ACCESSED: Basic Identity Metrics]';
+        await supabase.from('audit_logs').insert({
+            action: `${dataTag} Approved Government Service Request: ${serviceType}`,
+            user_id: req.user.id
+        }).catch(() => {});
+        
+        res.json(newService);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    
-    // Create immutable block for approved request
-    const blockData = {
-        recordId: newService.id,
-        userNID: req.user.nid,
-        service: serviceType,
-        status: 'Approved'
-    };
-    
-    const block = govChain.addBlock(blockData);
-    newService.blockHash = block.hash;
-    
-    accessLogs.push({ userId: req.user.id, timestamp: new Date().toISOString(), service: serviceType, reason: 'Approved Government Service Request' });
-
-    res.json(newService);
 });
 
 // Get User Services

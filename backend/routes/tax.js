@@ -23,7 +23,7 @@ router.post('/tax-file', async (req, res) => {
         
         // Log Audit Event
         await supabase.from('audit_logs').insert({
-            action: 'Tax Service accessed income verification engine.',
+            action: '[DATA_ACCESSED: Annual Income, Employment Status] Tax Service accessed income verification engine.',
             user_id: citizenId
         });
 

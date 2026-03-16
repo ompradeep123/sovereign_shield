@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../context/AuthContext';
-import { Layers, Plus, Link as LinkIcon, Check, Clock } from 'lucide-react';
+import { Layers, Plus, Link as LinkIcon, Check, Clock, Copy } from 'lucide-react';
 
 const ServiceRequests = () => {
     const [services, setServices] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loadingType, setLoadingType] = useState(null);
+    const [message, setMessage] = useState(null);
 
     const fetchServices = async () => {
         try {
@@ -36,7 +38,8 @@ const ServiceRequests = () => {
     }, []);
 
     const handleRequest = async (type) => {
-        setLoading(true);
+        setLoadingType(type);
+        setMessage(null);
         try {
             if (type === 'Birth Certificate') {
                 await api.post('/certificates/birth-certificate');
@@ -46,16 +49,25 @@ const ServiceRequests = () => {
                 await api.post('/services/request', { serviceType: type, simulateAnomaly: type === 'Healthcare Record Access' });
             }
             await fetchServices();
+            setMessage({ type: 'success', text: `${type} securely requested!` });
         } catch (err) {
             console.error('Request failed', err);
+            setMessage({ type: 'error', text: err.response?.data?.error || err.response?.data?.message || `Failed to process ${type}` });
         }
-        setLoading(false);
+        setLoadingType(null);
+        setTimeout(() => setMessage(null), 5000);
     };
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-2xl font-bold text-sovNavy flex items-center mb-6"><Layers className="text-sovBlue mr-3" size={28}/> Government Services</h2>
+                
+                {message && (
+                    <div className={`p-4 mb-6 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                        {message.text}
+                    </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {['Tax Filing', 'Birth Certificate', 'Subsidy Application', 'Health Record Access'].map(service => (
@@ -67,10 +79,11 @@ const ServiceRequests = () => {
                             </p>
                             <button 
                                 onClick={() => handleRequest(service)}
-                                disabled={loading}
-                                className="w-full bg-gray-50 hover:bg-sovBlue hover:text-white text-sovBlue font-medium py-2 rounded border border-gray-200 hover:border-transparent transition-colors flex justify-center items-center text-sm"
+                                disabled={loadingType !== null}
+                                className={`w-full font-medium py-2 rounded border transition-colors flex justify-center items-center text-sm ${loadingType === service ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-gray-50 hover:bg-sovBlue hover:text-white text-sovBlue border-gray-200 hover:border-transparent'}`}
                             >
-                                <Plus size={16} className="mr-1"/> Request
+                                {loadingType === service ? <Clock size={16} className="mr-2 animate-spin"/> : <Plus size={16} className="mr-1"/>}
+                                {loadingType === service ? 'Processing...' : 'Request'}
                             </button>
                         </div>
                     ))}
@@ -84,6 +97,7 @@ const ServiceRequests = () => {
                          <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
                              <tr>
                                  <th className="px-6 py-3">Service</th>
+                                 <th className="px-6 py-3">Record ID</th>
                                  <th className="px-6 py-3">Status</th>
                                  <th className="px-6 py-3">Date</th>
                                  <th className="px-6 py-3">Blockchain Hash</th>
@@ -91,8 +105,23 @@ const ServiceRequests = () => {
                          </thead>
                          <tbody>
                              {services.map(s => (
-                                 <tr key={s.id || s.certificate_id} className="border-b hover:bg-gray-50">
+                                 <tr key={s.id || s.certificate_id} className="border-b hover:bg-gray-50 group">
                                      <td className="px-6 py-4 font-medium text-gray-900">{s.service_type || s.type}</td>
+                                     <td className="px-6 py-4">
+                                         <div className="flex items-center space-x-2">
+                                             <span className="font-mono text-[10px] text-gray-400">{(s.id || s.certificate_id)?.substring(0, 8)}...</span>
+                                             <button 
+                                                 onClick={() => {
+                                                     navigator.clipboard.writeText(s.id || s.certificate_id);
+                                                     alert('Record ID Copied!');
+                                                 }}
+                                                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded text-sovBlue transition-opacity"
+                                                 title="Copy Full ID"
+                                             >
+                                                 <Copy size={10} />
+                                             </button>
+                                         </div>
+                                     </td>
                                      <td className="px-6 py-4">
                                          <span className={`px-2 py-1 rounded-full text-xs font-semibold flex w-max items-center ${
                                              (s.status === 'Approved' || s.data_hash) ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
@@ -101,11 +130,14 @@ const ServiceRequests = () => {
                                             {s.data_hash ? 'Issued (Blockchain)' : (s.status || 'Verified')}
                                          </span>
                                      </td>
-                                     <td className="px-6 py-4">{new Date(s.timestamp || s.created_at || new Date()).toLocaleString()}</td>
+                                     <td className="px-6 py-4 text-xs">{new Date(s.timestamp || s.created_at || new Date()).toLocaleString()}</td>
                                      <td className="px-6 py-4 font-mono text-xs text-sovBlue">
                                          {s.blockHash || s.data_hash ? (
-                                             <div className="flex items-center" title={s.blockHash || s.data_hash}><LinkIcon size={12} className="mr-1"/> {(s.blockHash || s.data_hash).substring(0, 16)}...</div>
-                                         ) : 'Pending'}
+                                             <div className="flex flex-col space-y-1">
+                                                <div className="flex items-center" title={s.blockHash || s.data_hash}><LinkIcon size={12} className="mr-1"/> {(s.blockHash || s.data_hash).substring(0, 16)}...</div>
+                                                <Link to={`/verify-cert?id=${s.id || s.certificate_id}`} className="text-[10px] text-sovAccent underline hover:text-emerald-600 w-max">Verify Integrity</Link>
+                                             </div>
+                                         ) : <span className="text-gray-400 italic">Processing...</span>}
                                      </td>
                                  </tr>
                              ))}

@@ -14,6 +14,7 @@ const verifyToken = async (req, res, next) => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser(token);
     if (error || !user) {
+      console.log('GetUser Failed:', error, 'User:', user);
       // In a real demo if supabase is down/mocked, fallback for demo purposes
       if (process.env.SUPABASE_URL?.includes('mock')) {
         const jwt = require('jsonwebtoken');
@@ -21,7 +22,7 @@ const verifyToken = async (req, res, next) => {
         req.user = verified;
         return next();
       }
-      return res.status(400).json({ message: 'Invalid Token.' });
+      return res.status(400).json({ message: 'Invalid Token.', error: error ? error.message : 'No user found' });
     }
 
     // Map Supabase user metadata to req.user for backward compatibility
@@ -30,9 +31,24 @@ const verifyToken = async (req, res, next) => {
       email: user.email,
       ...user.user_metadata
     };
+
+    // Lazily sync the citizen to the public database to satisfy foreign key constraints
+    if (!process.env.SUPABASE_URL?.includes('mock')) {
+      try {
+        await supabase.from('citizens').upsert({
+          id: user.id,
+          email: user.email,
+          role: user.user_metadata?.role || 'citizen'
+        }, { onConflict: 'id' });
+      } catch (err) {
+        // Ignore upsert errors to allow authentication to proceed
+      }
+    }
+
     next();
   } catch (error) {
-    res.status(400).json({ message: 'Invalid Token.' });
+    console.error("AuthMiddleware Error:", error);
+    res.status(400).json({ message: 'Invalid Token.', error: error.toString() });
   }
 };
 
