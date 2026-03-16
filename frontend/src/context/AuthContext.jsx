@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { signIn, signOut } from '../services/authService';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
 });
 
 api.interceptors.request.use(async config => {
@@ -44,6 +44,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    if (user?.id) {
+        localStorage.removeItem(`zkp_proofs_${user.id}`);
+    }
     await signOut();
   };
 

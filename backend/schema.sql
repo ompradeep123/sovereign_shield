@@ -4,7 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Citizens Table
-CREATE TABLE public.citizens (
+CREATE TABLE IF NOT EXISTS public.citizens (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT UNIQUE NOT NULL,
     role TEXT NOT NULL DEFAULT 'citizen',
@@ -12,7 +12,7 @@ CREATE TABLE public.citizens (
 );
 
 -- 2. Service Requests
-CREATE TABLE public.service_requests (
+CREATE TABLE IF NOT EXISTS public.service_requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     citizen_id UUID REFERENCES public.citizens(id) ON DELETE CASCADE,
     service_type TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE public.service_requests (
 );
 
 -- 3. Certificates
-CREATE TABLE public.certificates (
+CREATE TABLE IF NOT EXISTS public.certificates (
     certificate_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     citizen_id UUID REFERENCES public.citizens(id) ON DELETE CASCADE,
     service_type TEXT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE public.certificates (
 );
 
 -- 4. Blockchain Records
-CREATE TABLE public.blockchain_records (
+CREATE TABLE IF NOT EXISTS public.blockchain_records (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     record_id UUID UNIQUE NOT NULL REFERENCES public.service_requests(id) ON DELETE CASCADE,
     hash TEXT NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE public.blockchain_records (
 );
 
 -- 4. Threat Logs
-CREATE TABLE public.threat_logs (
+CREATE TABLE IF NOT EXISTS public.threat_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_type TEXT NOT NULL,
     ip_address TEXT,
@@ -47,7 +47,7 @@ CREATE TABLE public.threat_logs (
 );
 
 -- 5. Audit Logs
-CREATE TABLE public.audit_logs (
+CREATE TABLE IF NOT EXISTS public.audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     action TEXT NOT NULL,
     user_id UUID REFERENCES public.citizens(id) ON DELETE SET NULL,
@@ -55,7 +55,6 @@ CREATE TABLE public.audit_logs (
 );
 
 -- Enable RLS Policies
-
 ALTER TABLE public.citizens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
@@ -64,25 +63,48 @@ ALTER TABLE public.threat_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Citizens Policy
+DROP POLICY IF EXISTS "Citizens can view their own profile" ON public.citizens;
 CREATE POLICY "Citizens can view their own profile" ON public.citizens FOR SELECT
     USING (auth.uid() = id);
 
 -- Service Requests Policy
+DROP POLICY IF EXISTS "Citizens can insert requests" ON public.service_requests;
 CREATE POLICY "Citizens can insert requests" ON public.service_requests FOR INSERT
     WITH CHECK (auth.uid() = citizen_id);
     
+DROP POLICY IF EXISTS "Citizens can view their own requests" ON public.service_requests;
 CREATE POLICY "Citizens can view their own requests" ON public.service_requests FOR SELECT
     USING (auth.uid() = citizen_id);
 
 -- Certificates Policy
+DROP POLICY IF EXISTS "Citizens can view their own certificates" ON public.certificates;
 CREATE POLICY "Citizens can view their own certificates" ON public.certificates FOR SELECT
     USING (auth.uid() = citizen_id);
 
 -- Blockchain Records
+DROP POLICY IF EXISTS "Anyone can verify blockchain records" ON public.blockchain_records;
 CREATE POLICY "Anyone can verify blockchain records" ON public.blockchain_records FOR SELECT
     USING (true);
 
--- System generated logic can bypass via service_role. 
--- For administrators, we can create a secondary check on the role metadata.
-CREATE POLICY "Admins bypass RLS" ON public.service_requests FOR ALL
+-- Audit Logs
+DROP POLICY IF EXISTS "Citizens can view their own audit logs" ON public.audit_logs;
+CREATE POLICY "Citizens can view their own audit logs" ON public.audit_logs FOR SELECT
+    USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Admins can view all audit logs" ON public.audit_logs;
+CREATE POLICY "Admins can view all audit logs" ON public.audit_logs FOR SELECT
+    USING ( (SELECT role FROM public.citizens WHERE id = auth.uid()) = 'admin' );
+
+-- Threat Logs
+DROP POLICY IF EXISTS "Admins can view threat logs" ON public.threat_logs;
+CREATE POLICY "Admins can view threat logs" ON public.threat_logs FOR SELECT
+    USING ( (SELECT role FROM public.citizens WHERE id = auth.uid()) = 'admin' );
+
+-- Global Admin Override
+DROP POLICY IF EXISTS "Admins bypass RLS on services" ON public.service_requests;
+CREATE POLICY "Admins bypass RLS on services" ON public.service_requests FOR ALL
+    USING ( (SELECT role FROM public.citizens WHERE id = auth.uid()) = 'admin' );
+
+DROP POLICY IF EXISTS "Admins bypass RLS on citizens" ON public.citizens;
+CREATE POLICY "Admins bypass RLS on citizens" ON public.citizens FOR SELECT
     USING ( (SELECT role FROM public.citizens WHERE id = auth.uid()) = 'admin' );

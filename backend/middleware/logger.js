@@ -1,43 +1,36 @@
-const { accessLogs, threatLogs } = require('../db/mockDb');
+const supabase = require('../lib/supabaseClient');
 
-const logActivity = (req, res, next) => {
-  // Add to generalized threat radar logs based on endpoints
-  const ip = req.ip || req.connection.remoteAddress;
-  const path = req.originalUrl;
-  const method = req.method;
+const logActivity = async (req, res, next) => {
+    const start = Date.now();
+    
+    // Once the response is finished
+    res.on('finish', async () => {
+        const duration = Date.now() - start;
+        const logEntry = {
+            method: req.method,
+            endpoint: req.originalUrl,
+            status: res.statusCode,
+            duration,
+            ip: req.ip || req.header('x-forwarded-for') || '127.0.0.1',
+            timestamp: new Date().toISOString()
+        };
 
-  // Basic suspicious activity detection
-  if (path.includes('.env') || path.includes('admin') && req.method === 'POST') {
-     threatLogs.push({
-       timestamp: new Date().toISOString(),
-       ip,
-       path,
-       method,
-       severity: 'HIGH',
-       message: 'Suspicious path access attempted'
-     });
-  } else if (path.includes('login')) {
-     threatLogs.push({
-       timestamp: new Date().toISOString(),
-       ip,
-       path,
-       method,
-       severity: 'LOW',
-       message: 'Login endpoint accessed'
-     });
-  }
+        // If status is an error or unauthorized, log as potential threat
+        if (res.statusCode >= 400) {
+            await supabase.from('threat_logs').insert({
+                event_type: `API_${res.statusCode}_ERROR`,
+                ip_address: logEntry.ip,
+                severity: res.statusCode === 401 || res.statusCode === 403 ? 'MEDIUM' : 'LOW'
+            }).catch(() => {});
+        }
 
-  // Intercept response to log access data (Trust Timeline)
-  if (req.user && path.includes('/api/services')) {
-    accessLogs.push({
-      userId: req.user.id,
-      timestamp: new Date().toISOString(),
-      service: 'API Gateway',
-      reason: `Accessed ${method} ${path}`
+        // For demo auditing of service requests
+        if (req.method === 'POST' && req.originalUrl.includes('/api/')) {
+            console.log(`[LOG] ${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`);
+        }
     });
-  }
-  
-  next();
+
+    next();
 };
 
 module.exports = { logActivity };

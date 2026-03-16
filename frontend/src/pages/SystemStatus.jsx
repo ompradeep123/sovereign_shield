@@ -7,7 +7,8 @@ const SystemStatus = () => {
 
     const fetchStatus = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/status');
+            const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+            const res = await axios.get(`${apiBase.replace('/api', '')}/api/status`);
             setStatus(res.data);
         } catch (err) {
             setStatus({ status: 'OFFLINE', node: 'Unknown' });
