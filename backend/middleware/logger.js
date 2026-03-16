@@ -17,11 +17,13 @@ const logActivity = async (req, res, next) => {
 
         // If status is an error or unauthorized, log as potential threat
         if (res.statusCode >= 400) {
-            await supabase.from('threat_logs').insert({
-                event_type: `API_${res.statusCode}_ERROR`,
-                ip_address: logEntry.ip,
-                severity: res.statusCode === 401 || res.statusCode === 403 ? 'MEDIUM' : 'LOW'
-            }).catch(() => {});
+            try {
+                await supabase.from('threat_logs').insert({
+                    event_type: `API_${res.statusCode}_ERROR`,
+                    ip_address: logEntry.ip,
+                    severity: res.statusCode === 401 || res.statusCode === 403 ? 'MEDIUM' : 'LOW'
+                });
+            } catch(e) {}
         }
 
         // For demo auditing of service requests
