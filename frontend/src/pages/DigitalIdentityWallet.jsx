@@ -126,7 +126,7 @@ const DigitalIdentityWallet = () => {
             if (user?.id) localStorage.setItem(`zkp_proofs_${user.id}`, JSON.stringify(updatedProofs));
 
             // Log ledger update
-            await api.post('/admin/audit-logs/record', {
+            await api.post('/services/audit-logs/record', {
                 action: `[ZKP_ISSUED] Proof generated for blockchain-anchored document: ${doc.id}`,
                 resource: 'Cryptographic Wallet'
             });

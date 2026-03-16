@@ -150,4 +150,21 @@ router.get('/timeline', async (req, res) => {
     res.json(uTimeline);
 });
 
+// Log Audit Event (Citizen-facing)
+router.post('/audit-logs/record', async (req, res) => {
+    try {
+        const { action } = req.body;
+        const supabase = require('../lib/supabaseClient');
+        
+        await supabase.from('audit_logs').insert({
+            action,
+            user_id: req.user.id
+        });
+        
+        res.json({ status: 'SUCCESS' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
