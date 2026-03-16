@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 import { Layers, Plus, Link as LinkIcon, Check, Clock, Copy } from 'lucide-react';
 
 const ServiceRequests = () => {
+    const navigate = useNavigate();
     const [services, setServices] = useState([]);
     const [loadingType, setLoadingType] = useState(null);
     const [message, setMessage] = useState(null);
@@ -38,24 +39,23 @@ const ServiceRequests = () => {
     }, []);
 
     const handleRequest = async (type) => {
-        setLoadingType(type);
-        setMessage(null);
-        try {
-            if (type === 'Birth Certificate') {
-                await api.post('/certificates/birth-certificate');
-            } else if (type === 'Tax Filing') {
-                await api.post('/tax/tax-file');
-            } else {
+        if (type === 'Birth Certificate') {
+            navigate('/services/birth-certificate');
+        } else if (type === 'Tax Filing') {
+            navigate('/services/tax-filing');
+        } else {
+            setLoadingType(type);
+            setMessage(null);
+            try {
                 await api.post('/services/request', { serviceType: type, simulateAnomaly: type === 'Healthcare Record Access' });
+                await fetchServices();
+                setMessage({ type: 'success', text: `${type} securely requested!` });
+            } catch (err) {
+                setMessage({ type: 'error', text: err.response?.data?.error || `Failed to process ${type}` });
             }
-            await fetchServices();
-            setMessage({ type: 'success', text: `${type} securely requested!` });
-        } catch (err) {
-            console.error('Request failed', err);
-            setMessage({ type: 'error', text: err.response?.data?.error || err.response?.data?.message || `Failed to process ${type}` });
+            setLoadingType(null);
+            setTimeout(() => setMessage(null), 5000);
         }
-        setLoadingType(null);
-        setTimeout(() => setMessage(null), 5000);
     };
 
     return (

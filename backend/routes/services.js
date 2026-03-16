@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { generateZKP, verifyZKP } = require('../zkp/zkpSim');
 const govChain = require('../blockchain/hashChain');
+const { storeHashOnBlockchain, verifyHashOnBlockchain } = require('../blockchain/blockchainService');
 const { services, users, accessLogs, exceptions, threatLogs } = require('../db/mockDb');
 
 router.use(verifyToken);
@@ -148,6 +149,236 @@ router.get('/timeline', async (req, res) => {
     
     const uTimeline = accessLogs.filter(a => a.userId === req.user.id).reverse();
     res.json(uTimeline);
+});
+
+// 1. BIRTH CERTIFICATE SERVICE MODULE
+router.post('/birth-certificate/request', async (req, res) => {
+    try {
+        const citizenId = req.user.id;
+        const { childName, dob, pob, hospitalName, hospitalRecordId, parentName, parentNid, address } = req.body;
+
+        // Step 1: Input Validation
+        if (!childName || !dob || !pob || !hospitalRecordId) {
+            return res.status(400).json({ error: 'Missing mandatory fields for registration' });
+        }
+
+        // Step 2: Service Request Persistence (Status: Under Verification)
+        const supabase = require('../lib/supabaseClient');
+        const { data: request, error: reqErr } = await supabase
+            .from('service_requests')
+            .insert({
+                citizen_id: citizenId,
+                service_type: 'Birth Certificate',
+                status: 'Under Verification'
+            }).select().single();
+
+        if (reqErr) throw reqErr;
+
+        // Step 3: Simulate Hospital Record & Jurisdiction Verification
+        // In a real system, this would call Hospital API and Municipality API
+        const isHospitalRecordValid = hospitalRecordId.startsWith('HOSP-');
+        const isJurisdictionValid = address && address.length > 10;
+
+        if (!isHospitalRecordValid || !isJurisdictionValid) {
+            await supabase.from('service_requests').update({ status: 'Rejected' }).eq('id', request.id);
+            return res.status(422).json({ 
+                status: 'Rejected', 
+                reason: 'Hospital Record ID could not be corroborated with National Health Stack.' 
+            });
+        }
+
+        // Step 4: Processing (Simulated Delay/Logic)
+        await supabase.from('service_requests').update({ status: 'Processing' }).eq('id', request.id);
+
+        // Step 5: Certificate Generation
+        const certMetadata = {
+            certificateId: request.id,
+            childName,
+            dob,
+            pob,
+            parentName,
+            issuingAuthority: 'Ministry of Civil Registry',
+            timestamp: new Date().toISOString()
+        };
+        const dataHash = crypto.createHash('sha256').update(JSON.stringify(certMetadata)).digest('hex');
+
+        // Step 6: Blockchain Anchoring
+        const txHash = await storeHashOnBlockchain(request.id, dataHash);
+
+        // Step 7: Finalize
+        await supabase.from('certificates').insert({
+            certificate_id: request.id,
+            citizen_id: citizenId,
+            service_type: 'Birth Certificate',
+            data_hash: dataHash
+        });
+
+        await supabase.from('service_requests').update({ status: 'Completed' }).eq('id', request.id);
+
+        // Step 8: Audit Log
+        await supabase.from('audit_logs').insert({
+            action: `[DATA_ACCESSED: Hospital Record ID, Parent National ID, Domicile Details] [BIRTH_CERT_ISSUED] Verified hospital record ${hospitalRecordId} and issued digital certificate anchored to Polygon. TX: ${txHash}`,
+            user_id: citizenId
+        });
+
+        res.json({ status: 'SUCCESS', recordId: request.id, txHash });
+
+    } catch (error) {
+        console.error('Birth Cert Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/birth-certificate/status/:id', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        const { data: request } = await supabase.from('service_requests').select('*').eq('id', req.params.id).single();
+        res.json(request);
+    } catch (e) {
+        res.status(404).json({ error: 'Request not found' });
+    }
+});
+
+// 2. TAX FILING SERVICE MODULE
+router.post('/tax-filing/request', async (req, res) => {
+    try {
+        const citizenId = req.user.id;
+        const { taxpayerId, financialYear, income, deductions, taxPaid } = req.body;
+
+        // Step 1: Identity & Taxpayer Verification
+        if (!taxpayerId || !financialYear) {
+            return res.status(400).json({ error: 'Taxpayer ID and Financial Year required' });
+        }
+
+        const supabase = require('../lib/supabaseClient');
+        const { data: request, error: reqErr } = await supabase
+            .from('service_requests')
+            .insert({
+                citizen_id: citizenId,
+                service_type: 'Tax Filing',
+                status: 'Under Verification'
+            }).select().single();
+
+        if (reqErr) throw reqErr;
+
+        // Step 2: Tax Calculation Logic
+        const taxableIncome = Math.max(0, income - deductions);
+        let taxLiability = 0;
+        if (taxableIncome > 500000) taxLiability = (taxableIncome - 500000) * 0.2 + 12500;
+        else if (taxableIncome > 250000) taxLiability = (taxableIncome - 250000) * 0.05;
+
+        const balance = taxLiability - taxPaid;
+
+        // Step 3: Persistence
+        const receiptMetadata = {
+            filingId: request.id,
+            citizenId,
+            taxpayerId,
+            financialYear,
+            income,
+            taxLiability,
+            status: balance <= 0 ? 'CLEARED' : 'PENDING_PAYMENT',
+            timestamp: new Date().toISOString()
+        };
+        const dataHash = crypto.createHash('sha256').update(JSON.stringify(receiptMetadata)).digest('hex');
+
+        // Step 4: Blockchain Record
+        const txHash = await storeHashOnBlockchain(request.id, dataHash);
+
+        // Step 5: Save Receipt as Certificate
+        await supabase.from('certificates').insert({
+            certificate_id: request.id,
+            citizen_id: citizenId,
+            service_type: 'Tax Filing Receipt',
+            data_hash: dataHash
+        });
+
+        await supabase.from('service_requests').update({ 
+            status: 'Completed',
+            // Storing some metadata in status or request_data would be ideal if we had the column
+        }).eq('id', request.id);
+
+        // Step 6: Audit Log
+        await supabase.from('audit_logs').insert({
+            action: `[DATA_ACCESSED: Income Details, PAN Database, Tax Deductions] [TAX_FILED] Financial Year ${financialYear} processed. Liability: ${taxLiability}. Receipt anchored to Polygon. TX: ${txHash}`,
+            user_id: citizenId
+        });
+
+        res.json({ 
+            status: 'SUCCESS', 
+            recordId: request.id, 
+            taxLiability, 
+            balance,
+            txHash 
+        });
+
+    } catch (error) {
+        console.error('Tax Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 3. ENHANCED CERTIFICATE VERIFICATION
+router.post('/verify-certificate', async (req, res) => {
+    try {
+        const { certificateId } = req.body;
+        const supabase = require('../lib/supabaseClient');
+
+        // 1. Retrieve from DB
+        const { data: cert, error } = await supabase
+            .from('certificates')
+            .select('*')
+            .eq('certificate_id', certificateId)
+            .single();
+
+        if (!cert) return res.status(404).json({ valid: false, message: 'Registry Error: Certificate ID not found.' });
+
+        // 2. Recompute Hash Verification (In a real system we'd re-hash the data if we had it stored)
+        // Here we verify the stored hash against the Blockchain record
+        const isBlockchainValid = await verifyHashOnBlockchain(certificateId, cert.data_hash);
+
+        // 3. Log verification audit
+        await supabase.from('audit_logs').insert({
+            action: `[CERT_VERIFIED] Integrity check performed on ${cert.service_type} (${certificateId}). Result: ${isBlockchainValid ? 'VALID' : 'TAMPERED'}`,
+            user_id: req.user.id
+        });
+
+        if (isBlockchainValid) {
+            res.json({
+                valid: true,
+                message: 'Certificate Integrity Verified',
+                serviceType: cert.service_type,
+                timestamp: cert.created_at,
+                ledger: 'Polygon Proof-of-Stake',
+                certificate: cert
+            });
+        } else {
+            res.json({
+                valid: false,
+                message: 'Security Violation: Blockchain hash mismatch. This certificate has been tampered with.',
+                ledger: 'Polygon Proof-of-Stake'
+            });
+        }
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Trust timeline (Already exists but ensure it pulls everything)
+router.get('/timeline', async (req, res) => {
+    try {
+        const supabase = require('../lib/supabaseClient');
+        const { data, error } = await supabase
+            .from('audit_logs')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('timestamp', { ascending: false });
+            
+        res.json(data || []);
+    } catch (e) {
+        res.json([]);
+    }
 });
 
 // Log Audit Event (Citizen-facing)

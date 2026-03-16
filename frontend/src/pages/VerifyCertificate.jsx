@@ -15,7 +15,7 @@ const VerifyCertificate = () => {
         setError(null);
         setResult(null);
         try {
-            const res = await api.get(`/certificates/verify/${id}`);
+            const res = await api.post('/services/verify-certificate', { certificateId: id });
             setResult(res.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Verification Error');
@@ -39,7 +39,7 @@ const VerifyCertificate = () => {
         setResult(null);
 
         try {
-            const res = await api.get(`/certificates/verify/${recordId}`);
+            const res = await api.post('/services/verify-certificate', { certificateId: recordId });
             setResult(res.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Verification Error');

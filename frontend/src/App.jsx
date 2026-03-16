@@ -20,6 +20,8 @@ import AdminCitizenRecords from './pages/AdminCitizenRecords';
 import AdminBlockchainIntegrity from './pages/AdminBlockchainIntegrity';
 import AdminAuditLogs from './pages/AdminAuditLogs';
 import AdminManagement from './pages/AdminManagement';
+import BirthCertificateApply from './pages/BirthCertificateApply';
+import TaxFilingApply from './pages/TaxFilingApply';
 
 function App() {
   return (
@@ -43,6 +45,8 @@ function App() {
             <Route path="/admin-audit" element={<AdminAuditLogs />} />
             <Route path="/admin-management" element={<AdminManagement />} />
             <Route path="/admin-radar" element={<AdminRadar />} />
+            <Route path="/services/birth-certificate" element={<BirthCertificateApply />} />
+            <Route path="/services/tax-filing" element={<TaxFilingApply />} />
             <Route path="/system-status" element={<SystemStatus />} />
             <Route path="/disaster-recovery" element={<DisasterRecovery />} />
           </Route>
