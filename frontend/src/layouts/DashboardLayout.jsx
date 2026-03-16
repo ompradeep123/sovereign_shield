@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, User, LogOut, Home, Key, FileText, Activity, Layers, ActivitySquare, ServerCrash, AlertCircle, Users, Link as LinkIcon, Shield, Settings } from 'lucide-react';
+import { ShieldCheck, User, LogOut, Home, Key, FileText, Activity, Layers, ActivitySquare, ServerCrash, AlertCircle, Users, Link as LinkIcon, Shield, Settings, Menu, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const DashboardLayout = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -33,26 +34,42 @@ const DashboardLayout = () => {
   const filteredLinks = navLinks.filter(item => item.role === 'all' || item.role === user?.role);
 
   return (
-    <div className="flex h-screen bg-sovLight font-sans overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen bg-sovLight font-sans overflow-hidden w-full">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-sovNavy text-white flex flex-col shadow-2xl z-10 transition-all duration-300">
-        <div className="h-16 flex items-center justify-center border-b border-gray-800">
-          <ShieldCheck className="h-8 w-8 text-sovAccent mr-2" />
-          <span className="text-xl tracking-tight font-semibold">Sovereign<span className="text-sovAccent">Shield</span></span>
+      <aside className={`fixed inset-y-0 left-0 w-72 md:w-64 bg-sovNavy text-white flex flex-col shadow-2xl z-50 transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
+          <div className="flex items-center">
+            <ShieldCheck className="h-8 w-8 text-sovAccent mr-2 shrink-0" />
+            <span className="text-xl tracking-tight font-semibold">Sovereign<span className="text-sovAccent">Shield</span></span>
+          </div>
+          <button className="md:hidden text-gray-400 hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={24} />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className="space-y-1 px-2">
+          <nav className="space-y-1 px-3">
             {filteredLinks.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive ? 'bg-sovBlue text-white shadow-md' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive ? 'bg-sovBlue text-white shadow-md' : 'text-gray-400 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  {item.icon}
+                  <div className={`${isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                    {item.icon}
+                  </div>
                   <span className="font-medium text-sm">{item.name}</span>
                 </Link>
               );
@@ -80,11 +97,18 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-[#F7F9FC]">
-        <header className="h-16 bg-white shadow-sm border-b border-gray-200 flex items-center px-8 z-0">
-            <div>
-              <h2 className="text-xl font-semibold text-sovNavy tracking-tight">E-Governance Secure Gateway</h2>
-              <div className="flex items-center text-xs space-x-2 text-gray-500 mt-1">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F9FC] relative z-0 w-full">
+        <header className="h-16 bg-white shadow-sm border-b border-gray-200 flex flex-col justify-center px-4 md:px-8 z-10 shrink-0 sticky top-0">
+          <div className="flex items-center">
+            <button 
+              className="mr-3 md:hidden p-2 -ml-2 text-sovNavy hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg md:text-xl font-semibold text-sovNavy tracking-tight truncate">E-Governance Secure Gateway</h2>
+              <div className="hidden md:flex items-center text-xs space-x-2 text-gray-500 mt-0.5">
                  <span className="flex items-center"><div className="w-2 h-2 rounded-full bg-green-500 mr-1 badge-secure"></div> Secure Connection</span>
                  <span>|</span>
                  <span>Zero Trust Architecture</span>
@@ -92,9 +116,13 @@ const DashboardLayout = () => {
                  <span>Encrypted Data-in-Transit (TLS 1.3)</span>
               </div>
             </div>
+          </div>
         </header>
-        <div className="p-8 pb-20">
-          <Outlet />
+
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 pb-24">
+          <div className="max-w-7xl mx-auto w-full pb-8">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

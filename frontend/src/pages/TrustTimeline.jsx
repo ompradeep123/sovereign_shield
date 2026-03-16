@@ -45,9 +45,9 @@ const TrustTimeline = () => {
                                 <div key={idx} className="relative pl-8">
                                     <div className="absolute w-4 h-4 bg-sovAccent rounded-full -left-[9px] top-1 shadow-[0_0_0_4px_rgba(16,185,129,0.2)]"></div>
                                     <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-sovBlue hover:shadow-md transition-all">
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                                             <h4 className="font-semibold text-gray-800">{event.service || 'SovereignShield'} System</h4>
-                                            <span className="text-xs bg-white text-gray-500 px-2 py-1 rounded border shadow-sm flex items-center font-medium"><Clock size={12} className="mr-1"/> {new Date(event.timestamp).toLocaleString()}</span>
+                                            <span className="text-xs w-max bg-white text-gray-500 px-2 py-1 rounded border shadow-sm flex items-center font-medium"><Clock size={12} className="mr-1"/> {new Date(event.timestamp).toLocaleString()}</span>
                                         </div>
                                         <p className="text-sm text-gray-600 font-medium">Access Reason:</p>
                                         <p className="text-sm text-sovNavy bg-white p-2 rounded border border-gray-200 mt-1 font-mono">{cleanReason}</p>

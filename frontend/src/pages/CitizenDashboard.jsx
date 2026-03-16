@@ -22,10 +22,10 @@ const CitizenDashboard = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Welcome Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 flex justify-between items-center bg-gradient-to-r from-sovNavy to-blue-900 text-white">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-sovNavy to-blue-900 text-white">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user?.name}</h1>
-          <p className="text-blue-100 font-medium">Digital Identity Status: <span className="text-green-300 font-semibold flex items-center inline-flex ml-1"><ShieldCheck size={16} className="mr-1"/> Verified Citizen</span></p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">Welcome back, {user?.name}</h1>
+          <p className="text-blue-100 font-medium flex items-center flex-wrap gap-1">Digital Identity Status: <span className="text-green-300 font-semibold flex items-center"><ShieldCheck size={16} className="mr-1"/> Verified Citizen</span></p>
         </div>
         <div className="hidden md:flex flex-col items-end">
           <div className="text-sm text-blue-200">System Integrity</div>

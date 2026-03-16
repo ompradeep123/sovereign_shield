@@ -39,9 +39,9 @@ const DigitalIdentityWallet = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start justify-between">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-sovNavy flex items-center"><Fingerprint className="text-sovBlue mr-3" size={28}/> Digital Identity Wallet</h2>
+                    <h2 className="text-2xl font-bold text-sovNavy flex items-center"><Fingerprint className="text-sovBlue mr-3 shrink-0" size={28}/> Digital Identity Wallet</h2>
                     <p className="text-gray-500 mt-2 max-w-xl text-sm leading-relaxed">
                         This wallet uses <strong className="text-sovNavy font-semibold">Zero-Knowledge Proofs (ZKP)</strong>. Instead of revealing your raw personal data (like your exact birthdate or exact income), it generates a cryptographic proof verifying that you meet the underlying criteria (e.g., "Over 18", "Income Tier 1"). 
                     </p>
@@ -49,14 +49,14 @@ const DigitalIdentityWallet = () => {
                 <button 
                   onClick={generateProofs} 
                   disabled={loading}
-                  className="bg-sovNavy text-white hover:bg-blue-900 px-5 py-2.5 rounded-lg shadow-md font-medium text-sm transition-colors disabled:opacity-50 flex items-center space-x-2"
+                  className="bg-sovNavy text-white hover:bg-blue-900 px-5 py-3 md:py-2.5 w-full md:w-auto rounded-lg shadow-md font-medium text-sm transition-colors disabled:opacity-50 flex justify-center items-center space-x-2 shrink-0"
                 >
                     <KeyRound size={18} />
                     <span>{loading ? 'Generating Proofs...' : 'Generate ZKP Proofs'}</span>
                 </button>
             </div>
 
-            {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center shadow-inner text-sm"><ShieldAlert className="mr-2"/> {error}</div>}
+            {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center shadow-inner text-sm"><ShieldAlert className="mr-2 shrink-0"/> {error}</div>}
 
             {proofs.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

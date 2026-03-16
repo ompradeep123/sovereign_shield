@@ -58,15 +58,15 @@ const VerifyCertificate = () => {
                 <form onSubmit={handleVerify} className="p-8 -mt-6">
                     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                         <label className="text-sm font-semibold text-gray-700 block mb-2 text-center tracking-widest uppercase">Target Record ID</label>
-                        <div className="flex items-center">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-0">
                            <input type="text"
                                required
-                               placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-                               className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-l-lg outline-none focus:ring-2 focus:ring-sovBlue focus:border-transparent font-mono text-sm"
+                               placeholder="e.g. 550e8400-e29b-..."
+                               className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg sm:rounded-r-none outline-none focus:ring-2 focus:ring-sovBlue focus:border-transparent font-mono text-sm w-full"
                                value={recordId}
                                onChange={(e) => setRecordId(e.target.value)}
                            />
-                           <button type="submit" disabled={loading} className="bg-sovBlue hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-r-lg shadow-md transition-colors flex items-center justify-center">
+                           <button type="submit" disabled={loading} className="bg-sovBlue hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg sm:rounded-l-none shadow-md transition-colors flex items-center justify-center w-full sm:w-auto shrink-0">
                               {loading ? <Cpu className="animate-spin mr-2" /> : <Search className="mr-2"/>} {loading ? 'Verifying...' : 'Verify'}
                            </button>
                         </div>

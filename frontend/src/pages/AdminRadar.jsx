@@ -48,12 +48,12 @@ const AdminRadar = () => {
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-6 text-white overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-500 opacity-5 blur-[100px] rounded-full"></div>
-                <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-800 pb-4 gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold flex items-center tracking-tight"><ActivitySquare className="text-red-500 mr-3" size={32}/> National Threat Radar</h2>
-                        <p className="text-gray-400 mt-1 uppercase text-sm tracking-widest font-mono">Quantum-Resistant Telemetry</p>
+                        <h2 className="text-2xl md:text-3xl font-bold flex items-center tracking-tight"><ActivitySquare className="text-red-500 mr-3 shrink-0" size={32}/> National Threat Radar</h2>
+                        <p className="text-gray-400 mt-1 uppercase text-xs md:text-sm tracking-widest font-mono">Quantum-Resistant Telemetry</p>
                     </div>
-                    <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center shadow-inner">
+                    <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center shadow-inner w-full md:w-auto">
                         <div className="text-xs text-gray-400 font-mono mb-1 uppercase tracking-wider">Defcon Level</div>
                         <div className={`text-2xl font-bold ${radarData.systemThreatLevel === 'HIGH' ? 'text-red-500 animate-pulse' : 'text-emerald-500'}`}>
                             {radarData.systemThreatLevel}
