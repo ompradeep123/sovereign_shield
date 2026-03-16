@@ -1,0 +1,6 @@
+{
+  "appId": "com.sovereignshield.app",
+  "appName": "SovereignShield",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
