@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 import { FileText, ShieldCheck, Clock, CheckCircle, ChevronRight, AlertCircle, Building2, Hospital, MapPin, User, ArrowLeft } from 'lucide-react';
+import BiometricGuard from '../components/BiometricGuard';
 
 const BirthCertificateApply = () => {
     const navigate = useNavigate();
@@ -19,14 +20,21 @@ const BirthCertificateApply = () => {
         address: ''
     });
 
+    const [isBiometricOpen, setIsBiometricOpen] = useState(false);
+    const [biometricVerified, setBiometricVerified] = useState(false);
+
     const [processingStep, setProcessingStep] = useState(0); // 0: Idle, 1: Validating, 2: Hospital Logic, 3: Blockchain Anchor
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleFormPreSubmit = (e) => {
         e.preventDefault();
+        setIsBiometricOpen(true);
+    };
+
+    const handleSubmit = async () => {
         setLoading(true);
         setError(null);
         setStep(2); // Move to processing stage
@@ -40,7 +48,10 @@ const BirthCertificateApply = () => {
             await new Promise(r => setTimeout(r, 2000));
 
             setProcessingStep(3); // Blockchain Anchoring
-            const response = await api.post('/services/birth-certificate/request', formData);
+            const response = await api.post('/services/birth-certificate/request', {
+                ...formData,
+                biometricVerified: true
+            });
             await new Promise(r => setTimeout(r, 1500));
 
             if (response.data.status === 'SUCCESS') {
@@ -132,7 +143,7 @@ const BirthCertificateApply = () => {
                     <p className="text-blue-200/60 text-sm">Secure Government Service Portal · End-to-End Encrypted</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                <form onSubmit={handleFormPreSubmit} className="p-8 space-y-8">
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-sm font-bold flex items-center">
                             <AlertCircle size={18} className="mr-3 shrink-0"/> {error}
@@ -228,6 +239,16 @@ const BirthCertificateApply = () => {
                         </button>
                     </div>
                 </form>
+
+                <BiometricGuard 
+                    isOpen={isBiometricOpen} 
+                    onVerified={() => {
+                        setIsBiometricOpen(false);
+                        handleSubmit();
+                    }}
+                    onCancel={() => setIsBiometricOpen(false)}
+                    serviceName="Birth Certificate Issuance"
+                />
             </div>
         </div>
     );

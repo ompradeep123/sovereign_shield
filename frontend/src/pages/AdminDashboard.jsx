@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
-import { Home, Users, Layers, AlertTriangle, Link as LinkIcon, ShieldCheck } from 'lucide-react';
+import { Home, Users, Layers, AlertTriangle, Link as LinkIcon, ShieldCheck, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -22,9 +22,9 @@ const AdminDashboard = () => {
 
     const navCards = [
         { label: 'Citizen Records', path: '/admin-citizens', icon: <Users size={24}/>, val: stats.totalUsers, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-        { label: 'Exception Queue', path: '/admin-exceptions', icon: <AlertTriangle size={24}/>, val: stats.pendingExceptions, color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
-        { label: 'Tracking Ledger', path: '/admin-chain', icon: <LinkIcon size={24}/>, val: `${stats.blockchainHeight} Blocks`, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-        { label: 'Gov Services', path: '/admin-audit', icon: <Layers size={24}/>, val: stats.activeServices, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' }
+        { label: 'Biometric Vaults', path: '/admin-radar', icon: <ShieldCheck size={24}/>, val: stats.biometricVaults, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+        { label: 'Trusted Devices', path: '/admin-radar', icon: <Smartphone size={24}/>, val: stats.trustedDevices, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' },
+        { label: 'Exception Queue', path: '/admin-exceptions', icon: <AlertTriangle size={24}/>, val: stats.pendingExceptions, color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' }
     ];
 
     return (

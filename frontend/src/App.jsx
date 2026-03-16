@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardLayout from './layouts/DashboardLayout';
 import CitizenDashboard from './pages/CitizenDashboard';
+import Profile from './pages/Profile';
 import DigitalIdentityWallet from './pages/DigitalIdentityWallet';
 import ServiceRequests from './pages/ServiceRequests';
 import VerifyCertificate from './pages/VerifyCertificate';
@@ -34,6 +35,7 @@ function App() {
           
           <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<CitizenDashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/wallet" element={<DigitalIdentityWallet />} />
             <Route path="/services" element={<ServiceRequests />} />
             <Route path="/verify-cert" element={<VerifyCertificate />} />

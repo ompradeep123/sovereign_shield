@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 import { Landmark, ShieldCheck, Clock, CheckCircle, ChevronRight, AlertCircle, TrendingUp, Calculator, Wallet, User, ArrowLeft, ReceiptText } from 'lucide-react';
+import BiometricGuard from '../components/BiometricGuard';
 
 const TaxFilingApply = () => {
     const navigate = useNavigate();
@@ -18,14 +19,20 @@ const TaxFilingApply = () => {
         taxPaid: ''
     });
 
+    const [isBiometricOpen, setIsBiometricOpen] = useState(false);
+
     const [processingStep, setProcessingStep] = useState(0); 
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleFormPreSubmit = (e) => {
         e.preventDefault();
+        setIsBiometricOpen(true);
+    };
+
+    const handleSubmit = async () => {
         setLoading(true);
         setError(null);
         setStep(2); 
@@ -42,7 +49,8 @@ const TaxFilingApply = () => {
                 ...formData,
                 income: parseFloat(formData.income),
                 deductions: parseFloat(formData.deductions),
-                taxPaid: parseFloat(formData.taxPaid)
+                taxPaid: parseFloat(formData.taxPaid),
+                biometricVerified: true
             });
             setResult(response.data);
             await new Promise(r => setTimeout(r, 1500));
@@ -149,7 +157,7 @@ const TaxFilingApply = () => {
                     <p className="text-blue-200/60 text-sm">Automated Digital Filing · Blockchain Anchored Transparency</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                <form onSubmit={handleFormPreSubmit} className="p-8 space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Profile */}
                         <div className="space-y-6">
@@ -229,6 +237,16 @@ const TaxFilingApply = () => {
                         </button>
                     </div>
                 </form>
+
+                <BiometricGuard 
+                    isOpen={isBiometricOpen} 
+                    onVerified={() => {
+                        setIsBiometricOpen(false);
+                        handleSubmit();
+                    }}
+                    onCancel={() => setIsBiometricOpen(false)}
+                    serviceName="Annual Income Tax Filing"
+                />
             </div>
         </div>
     );

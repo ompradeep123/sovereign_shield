@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, User, LogOut, Home, Key, FileText, Activity, Layers, ActivitySquare, ServerCrash, AlertCircle, Users, Link as LinkIcon, Shield, Settings, Menu, X } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext, api } from '../context/AuthContext';
 
 const DashboardLayout = () => {
   const { user, logout } = useContext(AuthContext);
@@ -14,8 +14,15 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
+  useEffect(() => {
+    if (user) {
+        api.post('/services/device/register').catch(e => console.warn('Device trust init deferred', e));
+    }
+  }, [user]);
+
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <Home size={20} />, role: 'all' },
+    { name: 'My Profile', path: '/profile', icon: <User size={20} />, role: 'all' },
     { name: 'Digital Identity Wallet', path: '/wallet', icon: <Key size={20} />, role: 'all' },
     { name: 'My Services', path: '/services', icon: <Layers size={20} />, role: 'all' },
     { name: 'Trust Timeline', path: '/timeline', icon: <Activity className="text-blue-500" size={20} />, role: 'all' },

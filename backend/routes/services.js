@@ -6,6 +6,7 @@ const { generateZKP, verifyZKP } = require('../zkp/zkpSim');
 const govChain = require('../blockchain/hashChain');
 const { storeHashOnBlockchain, verifyHashOnBlockchain } = require('../blockchain/blockchainService');
 const { services, users, accessLogs, exceptions, threatLogs } = require('../db/mockDb');
+const supabase = require('../lib/supabaseClient');
 
 router.use(verifyToken);
 
@@ -47,7 +48,6 @@ router.post('/verify-proof', (req, res) => {
 router.post('/request', async (req, res) => {
     try {
         const { serviceType, simulateAnomaly } = req.body;
-        const supabase = require('../lib/supabaseClient');
         
         if (simulateAnomaly) {
             // Write to mock DB for backward compat with admin anomaly queue
@@ -110,10 +110,10 @@ router.post('/request', async (req, res) => {
     }
 });
 
-// Get User Services
+// Get list of my requested services
 router.get('/my-services', async (req, res) => {
     try {
-        const supabase = require('../lib/supabaseClient');
+        const citizenId = req.user.id;
         // Merge Supabase services and mock services for demo purposes
         const { data: dbServices, error } = await supabase.from('service_requests').select('*').eq('citizen_id', req.user.id);
         const { data: dbCerts, err2 } = await supabase.from('certificates').select('*').eq('citizen_id', req.user.id);
@@ -139,10 +139,125 @@ router.get('/verify-cert/:id', (req, res) => {
     }
 });
 
+// Risk Score Calculation Helper
+const calculateRiskScore = async (req, citizenId) => {
+    let score = 0;
+    
+    // 1. Check Device Trust
+    const fingerprint = req.header('X-Device-Fingerprint');
+    if (fingerprint) {
+        const { data: trusted } = await supabase.from('trusted_devices').select('*').eq('citizen_id', citizenId).eq('device_fingerprint', fingerprint).single();
+        if (!trusted) score += 40; // High risk for unknown device
+    } else {
+        score += 20; // Moderate risk for missing fingerprint
+    }
+
+    // 2. Check recent failed attempts (Simulated logic or from threat_logs)
+    const { count: failedLogins } = await supabase.from('threat_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_type', 'Failed Login')
+        .gt('timestamp', new Date(Date.now() - 3600000).toISOString()); // Last 1 hour
+    
+    if (failedLogins > 3) score += 30;
+
+    return Math.min(100, score);
+};
+
+// Get Citizen Profile
+router.get('/profile', async (req, res) => {
+    try {
+        const { data: citizen } = await supabase.from('citizens').select('*').eq('id', req.user.id).single();
+        const { count: biometricCount } = await supabase.from('biometric_profiles').select('*', { count: 'exact', head: true }).eq('citizen_id', req.user.id);
+        
+        res.json({
+            ...citizen,
+            hasBiometric: biometricCount > 0,
+            securityLevel: biometricCount > 0 ? 'LEVEL_5_CLEARANCE' : 'LEVEL_2_STANDARD'
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Register Biometric Template
+router.post('/biometric/register', async (req, res) => {
+    try {
+        const { faceEmbedding } = req.body;
+        if (!faceEmbedding) throw new Error('Missing biometric data');
+        
+        // In production: Encrypt faceEmbedding with a vault key
+        const encryptedEmbedding = crypto.createHmac('sha256', process.env.JWT_SECRET || 'secret').update(faceEmbedding).digest('hex');
+
+        await supabase.from('biometric_profiles').upsert({
+            citizen_id: req.user.id,
+            face_embedding: encryptedEmbedding
+        });
+
+        await supabase.from('audit_logs').insert({
+            action: '[BIOMETRIC_ENROLLED] Facial biometric template registered and encrypted.',
+            user_id: req.user.id
+        });
+
+        res.json({ status: 'SUCCESS' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Verify Biometric
+router.post('/biometric/verify', async (req, res) => {
+    try {
+        const { faceEmbedding } = req.body;
+        
+        const { data: profile } = await supabase.from('biometric_profiles').select('face_embedding').eq('citizen_id', req.user.id).single();
+        
+        if (!profile) return res.status(404).json({ verified: false, message: 'No biometric profile found' });
+
+        const incomingHash = crypto.createHmac('sha256', process.env.JWT_SECRET || 'secret').update(faceEmbedding).digest('hex');
+        const isMatch = incomingHash === profile.face_embedding;
+
+        if (isMatch) {
+            await supabase.from('audit_logs').insert({
+                action: '[BIOMETRIC_VERIFIED] Step-up authentication successful via Facial ID.',
+                user_id: req.user.id
+            });
+            res.json({ verified: true });
+        } else {
+            res.status(401).json({ verified: false, message: 'Biometric mismatch' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Register Device Trust
+router.post('/device/register', async (req, res) => {
+    try {
+        const fingerprint = req.header('X-Device-Fingerprint');
+        if (!fingerprint) throw new Error('No fingerprint provided');
+        await supabase.from('trusted_devices').upsert({
+            citizen_id: req.user.id,
+            device_fingerprint: fingerprint,
+            metadata: {
+                userAgent: req.header('User-Agent'),
+                ip: req.ip
+            }
+        });
+
+        await supabase.from('audit_logs').insert({
+            action: `[DEVICE_TRUSTED] New device ${fingerprint.substring(0,8)}... registered.`,
+            user_id: req.user.id
+        });
+
+        res.json({ status: 'SUCCESS' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Trust timeline
 router.get('/timeline', async (req, res) => {
     try {
-        const supabase = require('../lib/supabaseClient');
         const { data, error } = await supabase.from('audit_logs').select('*').eq('user_id', req.user.id).order('timestamp', { ascending: false });
         if (data && data.length > 0) return res.json(data);
     } catch (e) {}
@@ -154,8 +269,19 @@ router.get('/timeline', async (req, res) => {
 // 1. BIRTH CERTIFICATE SERVICE MODULE
 router.post('/birth-certificate/request', async (req, res) => {
     try {
+        const { childName, dob, pob, hospitalName, hospitalRecordId, parentName, parentNid, address, biometricVerified } = req.body;
         const citizenId = req.user.id;
-        const { childName, dob, pob, hospitalName, hospitalRecordId, parentName, parentNid, address } = req.body;
+
+        // Zero-Trust Enforcement: Biometric Check
+        if (!biometricVerified) {
+            return res.status(403).json({ error: 'Security Violation: Step-up Biometric Authentication required for this sensitive action.' });
+        }
+
+        // Zero-Trust Enforcement: Risk Score Check
+        const riskScore = await calculateRiskScore(req, citizenId);
+        if (riskScore > 70) {
+            return res.status(403).json({ error: `Security Intercept: High Risk Score (${riskScore}) detected for this device/session. Access Denied.` });
+        }
 
         // Step 1: Input Validation
         if (!childName || !dob || !pob || !hospitalRecordId) {
@@ -163,7 +289,6 @@ router.post('/birth-certificate/request', async (req, res) => {
         }
 
         // Step 2: Service Request Persistence (Status: Under Verification)
-        const supabase = require('../lib/supabaseClient');
         const { data: request, error: reqErr } = await supabase
             .from('service_requests')
             .insert({
@@ -231,7 +356,6 @@ router.post('/birth-certificate/request', async (req, res) => {
 
 router.get('/birth-certificate/status/:id', async (req, res) => {
     try {
-        const supabase = require('../lib/supabaseClient');
         const { data: request } = await supabase.from('service_requests').select('*').eq('id', req.params.id).single();
         res.json(request);
     } catch (e) {
@@ -242,15 +366,25 @@ router.get('/birth-certificate/status/:id', async (req, res) => {
 // 2. TAX FILING SERVICE MODULE
 router.post('/tax-filing/request', async (req, res) => {
     try {
+        const { taxpayerId, financialYear, income, deductions, taxPaid, biometricVerified } = req.body;
         const citizenId = req.user.id;
-        const { taxpayerId, financialYear, income, deductions, taxPaid } = req.body;
+
+        // Zero-Trust Enforcement: Biometric Check
+        if (!biometricVerified) {
+            return res.status(403).json({ error: 'Security Violation: Step-up Biometric Authentication required for sensitive financial filing.' });
+        }
+
+        // Zero-Trust Enforcement: Risk Score Check
+        const riskScore = await calculateRiskScore(req, citizenId);
+        if (riskScore > 70) {
+            return res.status(403).json({ error: `Security Intercept: High Risk Score (${riskScore}) detected. Manual verification required.` });
+        }
 
         // Step 1: Identity & Taxpayer Verification
         if (!taxpayerId || !financialYear) {
             return res.status(400).json({ error: 'Taxpayer ID and Financial Year required' });
         }
 
-        const supabase = require('../lib/supabaseClient');
         const { data: request, error: reqErr } = await supabase
             .from('service_requests')
             .insert({
@@ -322,7 +456,6 @@ router.post('/tax-filing/request', async (req, res) => {
 router.post('/verify-certificate', async (req, res) => {
     try {
         const { certificateId } = req.body;
-        const supabase = require('../lib/supabaseClient');
 
         // 1. Retrieve from DB
         const { data: cert, error } = await supabase
@@ -385,7 +518,6 @@ router.get('/timeline', async (req, res) => {
 router.post('/audit-logs/record', async (req, res) => {
     try {
         const { action } = req.body;
-        const supabase = require('../lib/supabaseClient');
         
         await supabase.from('audit_logs').insert({
             action,

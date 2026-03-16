@@ -18,11 +18,13 @@ router.get('/radar', async (req, res) => {
         const totalUsers = userCount || users.length;
         
         const failedLogins = recentThreats.filter(t => t.event_type?.includes('login') || t.message?.includes('login')).length;
+        const { count: biometricEnrolled } = await supabase.from('biometric_profiles').select('*', { count: 'exact', head: true });
         
         res.json({
             totalUsers,
             failedLogins,
-            systemThreatLevel: failedLogins > 10 ? 'HIGH' : 'LOW',
+            biometricEnrolled: biometricEnrolled || 0,
+            systemThreatLevel: (failedLogins > 10 || (totalUsers > 0 && biometricEnrolled/totalUsers < 0.2)) ? 'HIGH' : 'LOW',
             recentThreats: recentThreats.map(t => ({
                 severity: t.severity || 'MEDIUM',
                 timestamp: t.timestamp || t.created_at,
@@ -59,17 +61,21 @@ router.get('/chain/audit', (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const supabase = require('../lib/supabaseClient');
-        const [{ count: uc }, { count: sc }, { count: bc }] = await Promise.all([
+        const [{ count: uc }, { count: sc }, { count: bc }, { count: bio }, { count: dev }] = await Promise.all([
             supabase.from('citizens').select('*', { count: 'exact', head: true }),
             supabase.from('service_requests').select('*', { count: 'exact', head: true }),
-            supabase.from('blockchain_records').select('*', { count: 'exact', head: true })
+            supabase.from('blockchain_records').select('*', { count: 'exact', head: true }),
+            supabase.from('biometric_profiles').select('*', { count: 'exact', head: true }),
+            supabase.from('trusted_devices').select('*', { count: 'exact', head: true })
         ]);
 
         res.json({
             totalUsers: uc || users.length,
             activeServices: sc || services.length,
-            pendingExceptions: sc > 0 ? 0 : exceptions.filter(e => e.status !== 'Resolved').length, // Simulating clean state on DB
-            blockchainHeight: bc || govChain.chain.length
+            pendingExceptions: sc > 0 ? 0 : exceptions.filter(e => e.status !== 'Resolved').length,
+            blockchainHeight: bc || govChain.chain.length,
+            biometricVaults: bio || 0,
+            trustedDevices: dev || 0
         });
     } catch (e) {
         res.json({

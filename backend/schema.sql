@@ -54,6 +54,23 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 6. Biometric Profiles
+CREATE TABLE IF NOT EXISTS public.biometric_profiles (
+    citizen_id UUID PRIMARY KEY REFERENCES public.citizens(id) ON DELETE CASCADE,
+    face_embedding TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. Trusted Devices
+CREATE TABLE IF NOT EXISTS public.trusted_devices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    citizen_id UUID REFERENCES public.citizens(id) ON DELETE CASCADE,
+    device_fingerprint TEXT NOT NULL,
+    metadata JSONB,
+    last_used TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Enable RLS Policies
 ALTER TABLE public.citizens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_requests ENABLE ROW LEVEL SECURITY;
@@ -61,6 +78,8 @@ ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blockchain_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.threat_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.biometric_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trusted_devices ENABLE ROW LEVEL SECURITY;
 
 -- Citizens Policy
 DROP POLICY IF EXISTS "Citizens can view their own profile" ON public.citizens;
@@ -108,3 +127,13 @@ CREATE POLICY "Admins bypass RLS on services" ON public.service_requests FOR ALL
 DROP POLICY IF EXISTS "Admins bypass RLS on citizens" ON public.citizens;
 CREATE POLICY "Admins bypass RLS on citizens" ON public.citizens FOR SELECT
     USING ( (SELECT role FROM public.citizens WHERE id = auth.uid()) = 'admin' );
+
+-- Biometric Profiles Policy
+DROP POLICY IF EXISTS "Citizens can manage their own biometrics" ON public.biometric_profiles;
+CREATE POLICY "Citizens can manage their own biometrics" ON public.biometric_profiles FOR ALL
+    USING (auth.uid() = citizen_id);
+
+-- Trusted Devices Policy
+DROP POLICY IF EXISTS "Citizens can manage their own devices" ON public.trusted_devices;
+CREATE POLICY "Citizens can manage their own devices" ON public.trusted_devices FOR ALL
+    USING (auth.uid() = citizen_id);

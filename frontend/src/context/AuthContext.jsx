@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { getDeviceFingerprint } from '../utils/biometric';
 import { supabase } from '../lib/supabaseClient';
 import { signIn, signOut } from '../services/authService';
 
@@ -12,6 +13,8 @@ api.interceptors.request.use(async config => {
   if (session?.access_token) {
      config.headers.Authorization = `Bearer ${session.access_token}`;
   }
+  // Zero Trust: Always attach device fingerprint
+  config.headers['X-Device-Fingerprint'] = getDeviceFingerprint();
   return config;
 });
 
