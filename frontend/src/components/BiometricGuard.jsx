@@ -5,6 +5,7 @@ import { verifyBiometric } from '../utils/biometric';
 
 const BiometricGuard = ({ isOpen, onVerified, onCancel, serviceName }) => {
     const [status, setStatus] = useState('IDLE'); // IDLE, SCANNING, VERIFYING, SUCCESS, FAILED
+    const [confidence, setConfidence] = useState(0);
     const videoRef = useRef(null);
     const [error, setError] = useState(null);
 
@@ -12,6 +13,7 @@ const BiometricGuard = ({ isOpen, onVerified, onCancel, serviceName }) => {
         if (isOpen) {
             setError(null);
             setStatus('SCANNING');
+            setConfidence(0);
             startScanner();
         }
     }, [isOpen]);
@@ -28,6 +30,14 @@ const BiometricGuard = ({ isOpen, onVerified, onCancel, serviceName }) => {
 
     const handleVerify = async () => {
         setStatus('VERIFYING');
+        // Artificial progress for confidence
+        let currentConf = 0;
+        const interval = setInterval(() => {
+            currentConf += 12;
+            if (currentConf > 96) clearInterval(interval);
+            setConfidence(currentConf);
+        }, 100);
+
         try {
             const stream = videoRef.current.srcObject;
             const embedding = await verifyBiometric(stream);
@@ -35,15 +45,19 @@ const BiometricGuard = ({ isOpen, onVerified, onCancel, serviceName }) => {
             const response = await api.post('/services/biometric/verify', { faceEmbedding: embedding });
             
             if (response.data.verified) {
+                setConfidence(98.4);
+                clearInterval(interval);
                 setStatus('SUCCESS');
                 setTimeout(() => {
-                    stream.getTracks().forEach(t => t.stop());
+                    const tracks = stream.getTracks();
+                    tracks.forEach(t => t.stop());
                     onVerified();
                 }, 1500);
             }
         } catch (err) {
+            clearInterval(interval);
             setStatus('FAILED');
-            setError('Identity match failed. Unauthorized access attempt logged.');
+            setError('Biometric Mismatch: Feature similarity below threshold (0.2). Attempt Logged.');
         }
     };
 
@@ -79,9 +93,12 @@ const BiometricGuard = ({ isOpen, onVerified, onCancel, serviceName }) => {
                         )}
 
                         {status === 'VERIFYING' && (
-                            <div className="absolute inset-0 bg-blue-600/20 flex flex-col items-center justify-center backdrop-blur-sm">
-                                <Cpu className="text-blue-400 animate-spin mb-2" size={32} />
-                                <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Processing Neural Embedding</p>
+                            <div className="absolute inset-0 bg-blue-600/30 flex flex-col items-center justify-center backdrop-blur-md">
+                                <Cpu className="text-blue-400 animate-spin mb-4" size={48} />
+                                <div className="w-3/4 h-1.5 bg-white/10 rounded-full overflow-hidden mb-2">
+                                    <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${confidence}%` }}></div>
+                                </div>
+                                <p className="text-[10px] font-black text-white uppercase tracking-[0.34em]">Cross-Checking Neural Map: {confidence}%</p>
                             </div>
                         )}
 

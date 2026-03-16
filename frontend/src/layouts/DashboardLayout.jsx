@@ -5,6 +5,7 @@ import { AuthContext, api } from '../context/AuthContext';
 
 const DashboardLayout = () => {
   const { user, logout } = useContext(AuthContext);
+  const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,6 +18,7 @@ const DashboardLayout = () => {
   useEffect(() => {
     if (user) {
         api.post('/services/device/register').catch(e => console.warn('Device trust init deferred', e));
+        api.get('/services/profile').then(res => setIsVerified(res.data.hasBiometric)).catch(() => {});
     }
   }, [user]);
 
@@ -85,11 +87,19 @@ const DashboardLayout = () => {
         </div>
         <div className="p-4 border-t border-gray-800">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shadow-inner relative">
                <User className="text-gray-300" size={20} />
+               {isVerified && (
+                 <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border border-gray-900">
+                   <ShieldCheck size={10} className="text-white" />
+                 </div>
+               )}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+              <p className="text-sm font-medium text-white truncate flex items-center">
+                {user?.name}
+                {isVerified && <ShieldCheck size={12} className="ml-1.5 text-emerald-400" />}
+              </p>
               <p className="text-xs text-gray-400 truncate uppercase">{user?.role} · {user?.nid}</p>
             </div>
           </div>
