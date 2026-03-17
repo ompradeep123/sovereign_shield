@@ -24,9 +24,9 @@ const DashboardLayout = () => {
     { name: t('dashboard'), path: '/dashboard', icon: <Home size={20} /> },
     { name: t('wallet'), path: '/wallet', icon: <Wallet size={20} /> },
     { name: t('services'), path: '/services', icon: <Layers size={20} /> },
-    { name: t('security_audit'), path: '/timeline', icon: <History size={20} /> },
-    { name: t('verified_citizen'), path: '/verify-cert', icon: <ShieldCheck size={20} /> },
-    { name: t('status'), path: '/profile', icon: <User size={20} /> },
+    { name: t('trust_timeline'), path: '/timeline', icon: <History size={20} /> },
+    { name: t('verify_cert'), path: '/verify-cert', icon: <ShieldCheck size={20} /> },
+    { name: t('profile'), path: '/profile', icon: <User size={20} /> },
   ];
 
   return (
