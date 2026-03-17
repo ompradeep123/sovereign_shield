@@ -5,9 +5,12 @@ import {
     Activity, Layers, Menu, X, Shield, History, Wallet 
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const DashboardLayout = () => {
   const { user, logout } = useContext(AuthContext);
+  const { t } = useLanguage();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,12 +21,12 @@ const DashboardLayout = () => {
   };
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard', icon: <Home size={20} /> },
-    { name: 'Identity Wallet', path: '/wallet', icon: <Wallet size={20} /> },
-    { name: 'Government Services', path: '/services', icon: <Layers size={20} /> },
-    { name: 'Trust Timeline', path: '/timeline', icon: <History size={20} /> },
-    { name: 'Verify Certificate', path: '/verify-cert', icon: <ShieldCheck size={20} /> },
-    { name: 'My Profile', path: '/profile', icon: <User size={20} /> },
+    { name: t('dashboard'), path: '/dashboard', icon: <Home size={20} /> },
+    { name: t('wallet'), path: '/wallet', icon: <Wallet size={20} /> },
+    { name: t('services'), path: '/services', icon: <Layers size={20} /> },
+    { name: t('security_audit'), path: '/timeline', icon: <History size={20} /> },
+    { name: t('verified_citizen'), path: '/verify-cert', icon: <ShieldCheck size={20} /> },
+    { name: t('status'), path: '/profile', icon: <User size={20} /> },
   ];
 
   return (
@@ -80,7 +83,7 @@ const DashboardLayout = () => {
             className="w-full flex items-center justify-center gap-3 p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all font-bold uppercase text-xs tracking-widest"
           >
             <LogOut size={18} />
-            <span className={`md:transition-opacity md:duration-300 ${!isSidebarOpen && 'md:hidden'}`}>Secure Logout</span>
+            <span className={`md:transition-opacity md:duration-300 ${!isSidebarOpen && 'md:hidden'}`}>{t('logout')}</span>
           </button>
         </div>
       </aside>
@@ -88,9 +91,14 @@ const DashboardLayout = () => {
       {/* Main Content Area */}
       <main className={`flex-1 transition-all duration-300 min-w-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}>
         <header className="h-20 border-b border-white/5 bg-[#030712]/50 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <div className="hidden sm:block">
+              <LanguageSelector />
+            </div>
+          </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="text-right hidden sm:block">

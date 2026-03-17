@@ -5,9 +5,12 @@ import {
     Radio, RefreshCw, Menu, X, Terminal, Shield 
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const AdminLayout = () => {
   const { user, logout } = useContext(AuthContext);
+  const { t } = useLanguage();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,11 +21,11 @@ const AdminLayout = () => {
   };
 
   const navLinks = [
-    { name: 'SOC Command', path: '/admin', icon: <Home size={20} /> },
-    { name: 'Live Monitoring', path: '/admin/monitoring', icon: <Activity size={20} /> },
-    { name: 'Threat Radar', path: '/admin/radar', icon: <Radio size={20} /> },
-    { name: 'Security Audit', path: '/admin/security-audit', icon: <Lock size={20} /> },
-    { name: 'Disaster Recovery', path: '/admin/disaster-recovery', icon: <RefreshCw size={20} /> },
+    { name: t('soc_command'), path: '/admin', icon: <Home size={20} /> },
+    { name: t('live_monitoring'), path: '/admin/monitoring', icon: <Activity size={20} /> },
+    { name: t('threat_radar'), path: '/admin/radar', icon: <Radio size={20} /> },
+    { name: t('security_audit'), path: '/admin/security-audit', icon: <Lock size={20} /> },
+    { name: t('disaster_recovery'), path: '/admin/disaster-recovery', icon: <RefreshCw size={20} /> },
   ];
 
   // If user is not admin, they shouldn't even see this (App.jsx will handle protection)
@@ -82,7 +85,7 @@ const AdminLayout = () => {
             className="w-full flex items-center justify-center gap-3 p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all font-bold uppercase text-xs tracking-widest"
           >
             <LogOut size={18} />
-            <span className={`lg:transition-opacity lg:duration-300 ${!isSidebarOpen && 'lg:hidden'}`}>Terminate Session</span>
+            <span className={`lg:transition-opacity lg:duration-300 ${!isSidebarOpen && 'lg:hidden'}`}>{t('terminate_session')}</span>
           </button>
         </div>
       </aside>
@@ -94,6 +97,9 @@ const AdminLayout = () => {
             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
+            <div className="hidden lg:block ml-2">
+              <LanguageSelector />
+            </div>
             <div className="hidden xs:flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/5 rounded-xl">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
               <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Secure Gateway</span>

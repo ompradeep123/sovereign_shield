@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Login from './pages/Login';
@@ -28,40 +29,42 @@ import AdminRadar from './pages/AdminRadar';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <LanguageProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          {/* Citizen Portal Routes */}
-          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<CitizenDashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/wallet" element={<DigitalIdentityWallet />} />
-            <Route path="/services" element={<ServiceRequests />} />
-            <Route path="/verify-cert" element={<VerifyCertificate />} />
-            <Route path="/timeline" element={<TrustTimeline />} />
-            <Route path="/services/birth-certificate" element={<BirthCertificateApply />} />
-            <Route path="/services/tax-filing" element={<TaxFilingApply />} />
-          </Route>
+            {/* Citizen Portal Routes */}
+            <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<CitizenDashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/wallet" element={<DigitalIdentityWallet />} />
+              <Route path="/services" element={<ServiceRequests />} />
+              <Route path="/verify-cert" element={<VerifyCertificate />} />
+              <Route path="/timeline" element={<TrustTimeline />} />
+              <Route path="/services/birth-certificate" element={<BirthCertificateApply />} />
+              <Route path="/services/tax-filing" element={<TaxFilingApply />} />
+            </Route>
 
-          {/* Admin Control Center Routes */}
-          <Route element={<ProtectedRoute adminOnly={true}><AdminLayout /></ProtectedRoute>}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/monitoring" element={<AdminMonitoring />} />
-            <Route path="/admin/security-audit" element={<AdminSecurityAudit />} />
-            <Route path="/admin/disaster-recovery" element={<AdminDisasterRecovery />} />
-            <Route path="/admin/radar" element={<AdminRadar />} />
-          </Route>
-          
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            {/* Admin Control Center Routes */}
+            <Route element={<ProtectedRoute adminOnly={true}><AdminLayout /></ProtectedRoute>}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+              <Route path="/admin/security-audit" element={<AdminSecurityAudit />} />
+              <Route path="/admin/disaster-recovery" element={<AdminDisasterRecovery />} />
+              <Route path="/admin/radar" element={<AdminRadar />} />
+            </Route>
+            
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

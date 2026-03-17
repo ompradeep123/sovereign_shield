@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 import { Shield, Lock, User, Eye, EyeOff, Terminal, Activity } from 'lucide-react';
 
 const AdminLogin = () => {
@@ -10,6 +12,7 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { login } = useContext(AuthContext);
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -44,13 +47,17 @@ const AdminLogin = () => {
         <div className="absolute bottom-1/4 right-1/4 w-32 sm:w-64 h-32 sm:h-64 bg-emerald-600/10 blur-[100px] rounded-full"></div>
       </div>
       
+      <div className="absolute top-0 right-0 p-4 z-20">
+        <LanguageSelector />
+      </div>
+
       <div className="max-w-md w-full relative z-10 animate-fade-in">
         {/* SOC Logo Section */}
         <div className="text-center mb-6 sm:mb-10">
           <div className="inline-flex p-3 sm:p-4 rounded-3xl bg-blue-600/10 border border-blue-500/20 mb-4 sm:mb-6 shadow-[0_0_50px_rgba(37,99,235,0.2)]">
             <Shield className="text-blue-500" size={32} sm:size={48} />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase mb-1 sm:mb-2">SOC CONTROL</h1>
+          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase mb-1 sm:mb-2">{t('soc_command')}</h1>
           <p className="text-blue-500 font-mono text-[9px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] font-bold">National Cyber Defense Layer</p>
         </div>
 
@@ -74,7 +81,7 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Operator ID</label>
+              <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">{t('operator_id')}</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} sm:size={18} />
                 <input
@@ -89,7 +96,7 @@ const AdminLogin = () => {
             </div>
 
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Secure Key</label>
+              <label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">{t('secure_key')}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} sm:size={18} />
                 <input
@@ -122,7 +129,7 @@ const AdminLogin = () => {
                 </>
               ) : (
                 <>
-                  <span>Initialize Connection</span>
+                  <span>{t('initialize_connection')}</span>
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
                 </>
               )}

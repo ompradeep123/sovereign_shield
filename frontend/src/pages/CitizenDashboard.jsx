@@ -2,9 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext, api } from '../context/AuthContext';
 import { ShieldCheck, Activity, Bell, FileText, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const CitizenDashboard = () => {
   const { user } = useContext(AuthContext);
+  const { t } = useLanguage();
   const [services, setServices] = useState([]);
 
   useEffect(() => {
@@ -25,8 +27,8 @@ const CitizenDashboard = () => {
       <div className="rounded-2xl shadow-2xl border border-white/10 p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#1d4ed8] via-[#0a192f] to-[#050b14] text-white relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-96 h-96 bg-sovBlue rounded-full blur-[120px] opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none"></div>
         <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Welcome back, {user?.name}</h1>
-          <p className="text-blue-100/80 font-medium flex items-center flex-wrap gap-2 text-sm md:text-base">Digital Identity Status: <span className="text-emerald-400 font-semibold flex items-center bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]"><ShieldCheck size={16} className="mr-1.5"/> Verified Citizen</span></p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">{t('welcome')}, {user?.name}</h1>
+          <p className="text-blue-100/80 font-medium flex items-center flex-wrap gap-2 text-sm md:text-base">{t('status')}: <span className="text-emerald-400 font-semibold flex items-center bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]"><ShieldCheck size={16} className="mr-1.5"/> {t('verified_citizen')}</span></p>
         </div>
         <div className="hidden md:flex flex-col items-end relative z-10 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-md">
           <div className="text-xs text-blue-200/70 font-mono tracking-widest uppercase mb-1">System Integrity</div>
@@ -58,17 +60,17 @@ const CitizenDashboard = () => {
               <div className="p-2 bg-blue-500/10 rounded-lg mr-3 border border-blue-500/20">
                 <Activity className="h-5 w-5 text-blue-400"/>
               </div>
-              Quick Actions
+              {t('quick_actions')}
             </h3>
             <div className="space-y-4">
-               <Link to="/wallet" className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-[#1e293b]/50 hover:bg-[#1e293b] hover:border-blue-500/30 hover:shadow-md transition-all duration-300 group">
-                  <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">Digital Identity Wallet</span>
+                <Link to="/wallet" className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-[#1e293b]/50 hover:bg-[#1e293b] hover:border-blue-500/30 hover:shadow-md transition-all duration-300 group">
+                  <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">{t('wallet')}</span>
                   <div className="p-1.5 rounded-md bg-[#0f172a] shadow-sm border border-white/10 group-hover:bg-blue-500 group-hover:border-blue-500 transition-colors">
                     <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" />
                   </div>
                </Link>
-               <Link to="/services" className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-[#1e293b]/50 hover:bg-[#1e293b] hover:border-blue-500/30 hover:shadow-md transition-all duration-300 group">
-                  <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">Request Service</span>
+                <Link to="/services" className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-[#1e293b]/50 hover:bg-[#1e293b] hover:border-blue-500/30 hover:shadow-md transition-all duration-300 group">
+                  <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">{t('services')}</span>
                   <div className="p-1.5 rounded-md bg-[#0f172a] shadow-sm border border-white/10 group-hover:bg-blue-500 group-hover:border-blue-500 transition-colors">
                     <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" />
                   </div>
@@ -82,7 +84,7 @@ const CitizenDashboard = () => {
               <div className="p-2 bg-[#1e293b] rounded-lg mr-3 border border-white/5">
                 <Bell className="h-5 w-5 text-slate-400"/>
               </div>
-              Recent Activity
+              {t('recent_activity')}
             </h3>
             {services.length === 0 ? (
                 <div className="text-sm text-slate-500 italic text-center py-6 bg-[#1e293b]/30 rounded-xl border border-white/5 border-dashed">No recent activity detected.</div>

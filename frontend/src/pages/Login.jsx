@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Lock, User, KeyRound } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +11,7 @@ const Login = () => {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState(null);
   const { login } = useContext(AuthContext);
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -29,13 +32,17 @@ const Login = () => {
           <div className="w-[300px] h-[300px] sm:w-[800px] sm:h-[800px] bg-blue-600/10 blur-[100px] sm:blur-[150px] rounded-full"></div>
       </div>
       
+      <div className="absolute top-0 right-0 p-4 z-20">
+        <LanguageSelector />
+      </div>
+
       <div className="max-w-md w-full bg-[#0f172a]/80 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/10 relative z-10 group hover:shadow-[0_0_40px_rgba(37,99,235,0.15)] transition-all duration-700 animate-scale-in">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-emerald-400 to-blue-600"></div>
         <div className="bg-[#1e293b]/50 border-b border-white/5 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full"></div>
             <ShieldCheck className="h-12 w-12 sm:h-16 sm:w-16 text-emerald-400 mb-3 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)] relative z-10" />
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight relative z-10 text-center">Sovereign<span className="text-emerald-400">Shield</span></h2>
-            <p className="text-[9px] sm:text-xs text-slate-400 mt-2 uppercase tracking-[0.2em] text-center font-bold bg-black/20 px-3 py-1 rounded-full border border-white/5 relative z-10 whitespace-nowrap">Zero-Trust Identity Portal</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight relative z-10 text-center">{t('login_title')}</h2>
+            <p className="text-[9px] sm:text-xs text-slate-400 mt-2 uppercase tracking-[0.2em] text-center font-bold bg-black/20 px-3 py-1 rounded-full border border-white/5 relative z-10 whitespace-nowrap">{t('login_subtitle')}</p>
         </div>
         
         <form onSubmit={handleLogin} className="p-6 sm:p-8 space-y-4 sm:space-y-6">
