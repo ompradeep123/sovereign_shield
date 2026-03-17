@@ -95,7 +95,7 @@ const DashboardLayout = () => {
             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div className="hidden sm:block">
+            <div>
               <LanguageSelector />
             </div>
           </div>

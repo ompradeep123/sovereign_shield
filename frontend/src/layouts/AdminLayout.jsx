@@ -97,7 +97,7 @@ const AdminLayout = () => {
             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div className="hidden lg:block ml-2">
+            <div className="ml-2">
               <LanguageSelector />
             </div>
             <div className="hidden xs:flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/5 rounded-xl">
