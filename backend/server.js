@@ -9,6 +9,7 @@ const adminRoutes = require('./routes/admin');
 const certRoutes = require('./routes/certificate');
 const taxRoutes = require('./routes/tax');
 const eligibilityRoutes = require('./routes/eligibility');
+const privacyRoutes = require('./routes/privacy');
 const { logActivity } = require('./middleware/logger');
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/certificates', certRoutes);
 app.use('/api/tax', taxRoutes);
 app.use('/api/eligibility', eligibilityRoutes);
+app.use('/api/privacy', privacyRoutes);
 app.use('/api/admin', adminRoutes);
 
 // 5. Resilience - Cloud Health Monitoring

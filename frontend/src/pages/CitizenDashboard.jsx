@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext, api } from '../context/AuthContext';
-import { ShieldCheck, Activity, Bell, FileText, ChevronRight, Layers } from 'lucide-react';
+import { ShieldCheck, Activity, Bell, FileText, ChevronRight, Layers, Fingerprint, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -60,13 +60,28 @@ const CitizenDashboard = () => {
             <Link to="/services/tax-filing" className="bg-[#0f172a] hover:bg-[#1e293b] border border-white/5 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg transition-all group overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-3xl rounded-full"></div>
               <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className="p-2 sm:p-3 bg-emerald-600/10 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all text-blue-400">
+                <div className="p-2 sm:p-3 bg-emerald-600/10 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all text-emerald-400">
                   <Activity size={20} className="sm:w-6 sm:h-6" />
                 </div>
-                <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] sm:text-[9px] font-bold text-blue-500 uppercase tracking-widest">Secure</div>
+                <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Active</div>
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white mb-1 uppercase tracking-tight truncate">Tax Compliance</h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">Encrypted tax filing and financial record management.</p>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-1 uppercase tracking-tight truncate">Direct Tax Portal</h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">Manage income tax compliance and verified returns.</p>
+            </Link>
+
+            <Link to="/privacy" className="bg-[#0f172a] hover:bg-[#1e293b] border border-white/5 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg transition-all group overflow-hidden relative sm:col-span-2">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[80px] rounded-full"></div>
+              <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className="p-2 sm:p-3 bg-blue-600/10 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all text-blue-400">
+                  <Fingerprint size={20} className="sm:w-6 sm:h-6" />
+                </div>
+                <div className="flex gap-2">
+                    <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] sm:text-[9px] font-bold text-blue-400 uppercase tracking-widest">Zero-Trust</div>
+                    <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-[8px] sm:text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Citizen-Led</div>
+                </div>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-1 uppercase tracking-tight truncate">{t('data_control')}</h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">View and control how government services access your verified personal attributes.</p>
             </Link>
           </div>
 

@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
     ShieldCheck, User, LogOut, Home, Key, FileText, 
-    Activity, Layers, Menu, X, Shield, History, Wallet 
+    Activity, Layers, Menu, X, Shield, History, Wallet, Fingerprint 
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -26,6 +26,7 @@ const DashboardLayout = () => {
     { name: t('services'), path: '/services', icon: <Layers size={20} /> },
     { name: t('trust_timeline'), path: '/timeline', icon: <History size={20} /> },
     { name: t('verify_cert'), path: '/verify-cert', icon: <ShieldCheck size={20} /> },
+    { name: t('privacy_center'), path: '/privacy', icon: <Fingerprint size={20} /> },
     { name: t('profile'), path: '/profile', icon: <User size={20} /> },
   ];
 

@@ -25,6 +25,8 @@ const translations = {
     initialize_connection: "Initialize Connection",
     login_title: "Sovereign Shield",
     login_subtitle: "Zero-Trust Identity Portal",
+    privacy_center: "Privacy Center",
+    data_control: "Data Control Center",
   },
   hi: {
     dashboard: "नागरिक डैशबोर्ड",
@@ -50,6 +52,8 @@ const translations = {
     initialize_connection: "कनेक्शन प्रारंभ करें",
     login_title: "सॉवरेन शील्ड",
     login_subtitle: "जीरो-ट्रस्ट पहचान पोर्टल",
+    privacy_center: "गोपनीयता केंद्र",
+    data_control: "डेटा नियंत्रण केंद्र",
   },
   te: {
     dashboard: "పౌర డాష్‌బోర్డ్",
@@ -75,6 +79,8 @@ const translations = {
     initialize_connection: "కనెక్షన్‌ని ప్రారంభించండి",
     login_title: "సావరిన్ షీల్డ్",
     login_subtitle: "జీరో-ట్రస్ట్ ఐడెంటిటీ పోర్టల్",
+    privacy_center: "గోప్యతా కేంద్రం",
+    data_control: "డేటా నియంత్రణ కేంద్రం",
   },
   ta: {
     dashboard: "குடிமகன் டாஷ்போர்டு",
@@ -100,6 +106,8 @@ const translations = {
     initialize_connection: "இணைப்பைத் தொடங்கவும்",
     login_title: "சவரன் ஷீல்ட்",
     login_subtitle: "ஜீரோ-ட்ரஸ்ட் அடையாள போர்டல்",
+    privacy_center: "தனியுரிமை மையம்",
+    data_control: "தரவு கட்டுப்பாட்டு மையம்",
   }
 };
 

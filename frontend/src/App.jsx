@@ -19,6 +19,7 @@ import VerifyCertificate from './pages/VerifyCertificate';
 import TrustTimeline from './pages/TrustTimeline';
 import BirthCertificateApply from './pages/BirthCertificateApply';
 import TaxFilingApply from './pages/TaxFilingApply';
+import DataControlCenter from './pages/DataControlCenter';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -49,6 +50,7 @@ function App() {
               <Route path="/timeline" element={<TrustTimeline />} />
               <Route path="/services/birth-certificate" element={<BirthCertificateApply />} />
               <Route path="/services/tax-filing" element={<TaxFilingApply />} />
+              <Route path="/privacy" element={<DataControlCenter />} />
             </Route>
 
             {/* Admin Control Center Routes */}
