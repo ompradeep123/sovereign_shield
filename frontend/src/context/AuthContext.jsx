@@ -27,15 +27,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Restore session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      const authUser = session?.user ? { ...session.user, ...session.user.user_metadata } : null;
-      setUser(authUser);
+      if (session?.user) {
+        const role = session.user.app_metadata?.role || session.user.user_metadata?.role || session.user.role;
+        setUser({ ...session.user, ...session.user.user_metadata, role });
+      } else {
+        setUser(null);
+      }
       setIsLoading(false);
     });
 
     // Listen to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const authUser = session?.user ? { ...session.user, ...session.user.user_metadata } : null;
-      setUser(authUser);
+      if (session?.user) {
+        const role = session.user.app_metadata?.role || session.user.user_metadata?.role || session.user.role;
+        setUser({ ...session.user, ...session.user.user_metadata, role });
+      } else {
+        setUser(null);
+      }
       setIsLoading(false);
     });
 
