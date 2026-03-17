@@ -41,7 +41,7 @@ const Register = () => {
         </div>
         
         <form onSubmit={handleRegister} className="p-6 sm:p-8 space-y-4 sm:space-y-5">
-          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 sm:p-4 text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-center justify-center">{error}</div>}
+          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 sm:p-4 text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-center justify-center break-words min-w-0 overflow-hidden">{error}</div>}
           {success && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-3 sm:p-4 text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.1)] flex items-center justify-center"><ShieldCheck size={18} className="mr-3"/> Registration Approved</div>}
           
           <div className="space-y-3 sm:space-y-4">

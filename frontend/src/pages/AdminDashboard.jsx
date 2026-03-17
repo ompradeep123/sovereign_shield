@@ -89,7 +89,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Quick Metrics */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     {[
                         { label: 'API Throughput', val: `${telemetry?.apiTraffic || 0} r/m`, icon: Zap, color: 'text-yellow-400' },
                         { label: 'Cluster Load', val: `${telemetry?.cpuUsage || 0}%`, icon: Server, color: 'text-blue-400' },
@@ -113,19 +113,19 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Command Modules */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                     {MODULES_CONFIG.map((mod, i) => {
                         const Icon = mod.Icon;
                         return (
-                            <Link to={mod.path} key={i} className="group bg-[#0f172a]/95 border border-white/5 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] hover:border-blue-500/50 transition-all shadow-xl relative overflow-hidden">
+                            <Link to={mod.path} key={i} className="group bg-[#0f172a]/95 border border-white/5 p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] hover:border-blue-500/50 transition-all shadow-xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-[80px] group-hover:bg-blue-600/10"></div>
                                 <div className="flex items-center gap-4 sm:gap-8 relative z-10 text-white">
                                     <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-black/40 flex items-center justify-center ${mod.color} group-hover:scale-110 transition-transform flex-shrink-0`}>
                                         <Icon size={24} className="sm:w-8 sm:h-8" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight truncate">{mod.label}</h3>
-                                        <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 line-clamp-1">{mod.desc}</p>
+                                        <h3 className="text-base sm:text-xl font-black uppercase tracking-tight truncate">{mod.label}</h3>
+                                        <p className="text-[10px] sm:text-sm text-slate-500 font-medium mt-1 line-clamp-1">{mod.desc}</p>
                                     </div>
                                     <ChevronRight className="text-slate-800 group-hover:text-blue-500 transition-all flex-shrink-0" size={20} />
                                 </div>

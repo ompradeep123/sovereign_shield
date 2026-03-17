@@ -73,9 +73,9 @@ const AdminLogin = () => {
           </div>
 
           {error && (
-            <div className="mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 text-red-500 text-[10px] sm:text-xs font-bold uppercase animate-shake">
+            <div className="mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 text-red-500 text-[10px] sm:text-xs font-bold uppercase animate-shake overflow-hidden">
               <Activity size={14} sm:size={16} className="shrink-0" />
-              <span>{error}</span>
+              <span className="break-words min-w-0">{error}</span>
             </div>
           )}
 

@@ -49,7 +49,7 @@ const Login = () => {
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 sm:p-4 text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-center shrink-0">
               <Lock size={16} className="mr-2 sm:mr-3 shrink-0"/>
-              <span className="truncate">{error}</span>
+              <span className="break-words">{error}</span>
             </div>
           )}
           

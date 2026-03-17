@@ -89,29 +89,33 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 transition-all duration-300 min-w-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}>
+      <main className={`flex-1 transition-all duration-300 min-w-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} relative`}>
         <header className="h-20 border-b border-white/5 bg-[#030712]/50 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button 
+              onClick={() => setSidebarOpen(!isSidebarOpen)} 
+              className="p-2 hover:bg-white/5 rounded-lg text-slate-400 active:scale-95 transition-transform"
+              aria-label="Toggle Sidebar"
+            >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div>
+            <div className="flex-shrink-0">
               <LanguageSelector />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
             <div className="text-right hidden sm:block">
               <p className="text-white text-xs font-black uppercase tracking-tight truncate max-w-[120px]">{user?.name || 'Citizen'}</p>
               <p className="text-[9px] text-emerald-500 font-mono font-bold uppercase tracking-widest">ID Verified</p>
             </div>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-white/5 flex items-center justify-center overflow-hidden flex-shrink-0 hover:border-blue-500/50 transition-colors">
                 <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name}`} alt="Profile" className="w-full h-full object-cover" />
             </div>
           </div>
         </header>
 
-        <div className="p-4 sm:p-8 max-w-full overflow-x-hidden">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-full overflow-x-hidden">
           <Outlet />
         </div>
       </main>
