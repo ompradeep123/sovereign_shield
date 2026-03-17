@@ -11,6 +11,7 @@ const taxRoutes = require('./routes/tax');
 const eligibilityRoutes = require('./routes/eligibility');
 const privacyRoutes = require('./routes/privacy');
 const { logActivity } = require('./middleware/logger');
+const { securityGuard, anomalyDetector } = require('./middleware/securityGuard');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,7 +27,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Device-Fingerprint'],
   credentials: true
 }));
-app.use(express.json());
 
 // 2. Traffic Control - Rate Limiting & Proxy Trust
 app.set('trust proxy', 1); // Crucial for AWS/Ngrok: Tells express to use the real client IP instead of the proxy IP
@@ -37,6 +37,10 @@ const limiter = rateLimit({
   message: { error: "Security Gateway: Too many requests. Potential DoS attack blocked." }
 });
 app.use(limiter);
+
+app.use(express.json());
+app.use(securityGuard);
+app.use(anomalyDetector);
 
 // 3. Observability - API Request Logging
 app.use(logActivity);
